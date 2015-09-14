@@ -5,11 +5,11 @@ import socket as dummysocket
 import diff_match_patch
 import reportLogs 
 global ALL_OBJECTS , PUSH_TO_CACHE, PREVIOUS_OBJECTS 
-
+##
 ALL_OBJECTS = [] 
 PUSH_TO_CACHE = []
 PREVIOUS_OBJECTS = {}
-
+##
 
 
 def startfunc():	
