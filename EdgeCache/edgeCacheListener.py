@@ -42,20 +42,22 @@ def listenFromController(num):
 		edgeObject = cPickle.loads(MESSAGE)
 		print edgeObject.url[:50]
 		ALL_OBJECTS.append(edgeObject)
+		time.sleep(0.001)
 
 
 
-def push_in_cache(edgeObject):
+def push_in_cache(edgeObject, mode):
 	#print 'ready to push    ' + edgeObject.url
 	res = '%s %s %s\r\n' % (edgeObject.request_ver, edgeObject.status, edgeObject.reason)
 	for header in edgeObject.headers:
 		res += header[0] + ": " + header[1] +"\n"
 
 	res = res+"\r\n"+edgeObject.content
-	with open('cache/Object.txt','wb') as f:
+	with open('cache/Object'+mode+'.txt','wb') as f:
 		f.write(res);
+	f.close()
 
-	path = 'cache/Object.txt'
+	#path = 'cache/Object'+mode+'.txt'
 	command = 'sudo ./tspush -f cache/Object.txt -u http://127.0.0.1:60001 -s '+edgeObject.url
 	os.system(command)
 	os.system('rm cache/*')
@@ -93,7 +95,7 @@ def applyDiff(obj):
 	newObject.reason = obj.reason
 
 	del obj
-	push_in_cache(newObject)
+	push_in_cache(newObject, 'diff')
 
 
 
@@ -106,11 +108,12 @@ def processObjects(num):
 			edgeObject = ALL_OBJECTS.pop(0)
 			
 			if not edgeObject.diff:			
-				push_in_cache(edgeObject)
+				push_in_cache(edgeObject, 'normal')
 				PREVIOUS_OBJECTS[edgeObject.url] = edgeObject
 			
 			else:
 				applyDiff(edgeObject)
+		time.sleep(0.001)
 
 
 startfunc()
