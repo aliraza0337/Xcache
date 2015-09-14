@@ -185,7 +185,13 @@ def processObject(currentObject, previousObject):
 	global ObjectsOnMem, WEB_PAGE_CHANGE_TRACK
 
 	currentTime = time.time()
-	previousTime = WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1][currentObject.url][-1]
+	try:
+		previousTime = WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1][currentObject.url][-1]
+	except:
+		print currentObject.url
+		print currentObject.webpage
+		print WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1]
+
 	difference = currentTime - previousTime
 	WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1][currentObject.url].append(currentTime)
 	print difference
