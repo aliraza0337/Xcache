@@ -161,10 +161,17 @@ def process_FromInternet(number):
 			tempObj = fromInternet.pop(0)
 
 			if tempObj.url in ObjectsOnMem:
+
+				if tempObj.url == "http://api.iperceptions.com/InviteTriggers":
+				print "---2---- ", tempObj.webpage
+
 				if ObjectsOnMem[tempObj.url].hash != tempObj.hash:
 					processObject(tempObj, ObjectsOnMem[tempObj.url].obj)
 			else:
 	
+				if tempObj.url == "http://api.iperceptions.com/InviteTriggers":
+				print "---1---- ", tempObj.webpage
+
 				if tempObj.webpage in WEB_PAGE_CHANGE_TRACK:
 
 					WEB_PAGE_CHANGE_TRACK[tempObj.webpage][1][tempObj.url] = [time.time()]
