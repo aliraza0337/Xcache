@@ -73,6 +73,6 @@ print $push if ($debug);
 
 
 my $sock = IO::Socket::INET->new(PeerAddr => $uri->host, PeerPort => $uri->port, Proto => 'tcp') or die "Error creating socket: $!";
-print $sock $push;
+#print $sock $push;
 print do { local $/; <$sock> };
 
