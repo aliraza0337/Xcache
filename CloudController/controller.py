@@ -21,7 +21,7 @@ ObjectsOnMem = {}
 
 def startController():
 	thread.start_new_thread(process_FromInternet, (1,))
-	#thread.start_new_thread(sendToEdgeCache, (1,))
+	thread.start_new_thread(sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	fromInternet.append(objectReceived)
@@ -237,8 +237,8 @@ def getThisObject(url):
 
 def sendToEdgeCache(number):
 	global pushToEdgeCache
-	EdgeCache_IP = '10.225.26.23'
-	EdgeCache_PORT = 5005
+	EdgeCache_IP = '10.230.240.204'
+	EdgeCache_PORT = 60002
 
 	while True:
 		if len(pushToEdgeCache) > 0:
@@ -247,6 +247,7 @@ def sendToEdgeCache(number):
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect((EdgeCache_IP, EdgeCache_PORT))
 			s.sendall(MESSAGE)
+			print "Pushing content"
 			s.close()
 			del s
 		time.sleep(0.010)

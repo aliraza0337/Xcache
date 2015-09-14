@@ -17,14 +17,14 @@ def startfunc():
 	thread1.start()
 	thread2 = Thread(target = processObjects, args = (1, ))
 	thread2.start()
-	thread3 = Thread(target = reportLogs.startFunc, args = (1, ))
-	thread3.start()
+	#thread3 = Thread(target = reportLogs.startFunc, args = (1, ))
+	#thread3.start()
 
 
 def listenFromController(num):
 
-	EdgeCache_IP = "10.225.26.23"
-	EdgeCache_Port = 5005
+	EdgeCache_IP = "10.230.240.204"
+	EdgeCache_Port = 60002
 
 	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
 	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
@@ -56,7 +56,7 @@ def push_in_cache(edgeObject):
 		f.write(res);
 
 	path = 'cache/Object.txt'
-	command = 'sudo ./tspush -f cache/Object.txt -u http://127.0.0.1:8080 -s '+edgeObject.url
+	command = 'sudo ./tspush -f cache/Object.txt -u http://127.0.0.1:60001 -s '+edgeObject.url
 	os.system(command)
 	os.system('rm cache/*')
 

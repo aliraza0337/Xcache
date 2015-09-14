@@ -13,8 +13,11 @@ global ALL_WEBSITES, All_Webpages
 All_Webpages = Q.PriorityQueue()
 
 ALL_WEBSITES = {}
-ALL_WEBSITES['http://www.cnn.com/'] = ''
-ALL_WEBSITES['http://www.apple.com/']=''
+ALL_WEBSITES['http://www.yasirzaki.net/'] = ''
+ALL_WEBSITES['http://www.ebay.com/']=''
+
+All_Webpages.put(( time.time() + 0 ,'http://www.yasirzaki.net/'))
+All_Webpages.put(( time.time() + 0 ,'http://www.ebay.com/'))
 
 def openPage (webpage):
 
@@ -73,7 +76,7 @@ def openPage (webpage):
 
 
 def sitesPrefetching (number):
-	global ALL_WEBSITES
+	global ALL_WEBSITES, All_Webpages
 
 	while True:
 		global ALL_WEBSITES
@@ -88,7 +91,7 @@ def sitesPrefetching (number):
 		print a[1]
 		if a[0] < currentTime+10:
 			webpage = a[1]
-			
+
 			print webpage
 			openPage(webpage)
 			
