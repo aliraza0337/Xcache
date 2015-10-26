@@ -19,8 +19,6 @@ from preFetching import *
 from OpenSSL.crypto import (X509Extension, X509, dump_privatekey, dump_certificate, load_certificate, load_privatekey,
 							PKey, TYPE_RSA, X509Req)
 from OpenSSL.SSL import FILETYPE_PEM
-CACHE_ALL_URLs = {}
-ALL_WEBSITES =  {}
 
 __author__ = 'Nadeem Douba'
 __copyright__ = 'Copyright 2012, PyMiProxy Project'
@@ -204,85 +202,61 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
 		url_requested = self.path
 		refrer_requested = ''
-		#print url_requested
-		serveFromCache = False
 
-		if url_requested in CACHE_ALL_URLs:
-			if controller.getThisObject(url_requested).isValidToServe():
-				serveFromCache = True
-
-		if not serveFromCache:
-
-			if not self.is_connect:
-				try:
-					# Connect to destination
-					self._connect_to_host()
-				except Exception, e:
-					self.send_error(500, str(e))
-					return
-				# Extract path
-				# Build request
-
-			req = '%s %s %s\r\n' % (self.command, self.path, self.request_version)
-
-			# Add headers to the request
-
-			if 'Referer' in self.headers:
-				refrer_requested =  self.headers['Referer']
-
-
-			req += '%s\r\n' % self.headers
-			# Append message body if present to the request
-
-			if 'Content-Length' in self.headers:
-				req += self.rfile.read(int(self.headers['Content-Length']))
-
+		if not self.is_connect:
 			try:
-				# Send it down the pipe!
-				self._proxy_sock.sendall(self.mitm_request(req))
+				# Connect to destination
+				self._connect_to_host()
+			except Exception, e:
+				self.send_error(500, str(e))
+				return
+			# Extract path
+			# Build request
 
-				# Parse response
-				h = HTTPResponse(self._proxy_sock)
+		req = '%s %s %s\r\n' % (self.command, self.path, self.request_version)
 
-				h.begin()
-				# Get rid of the pesky header
-				del h.msg['Transfer-Encoding']
+		# Add headers to the request
 
-				# Time to relay the message across
-				res = '%s %s %s\r\n' % (self.request_version, h.status, h.reason)
-				res += '%s\r\n' % h.msg
-				content_received = h.read()
-				res += content_received
+		if 'Referer' in self.headers:
+			refrer_requested =  self.headers['Referer']
 
-				HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, refrer_requested, 100) # TODO replace the 100 with RTT
-				controller.createObject(HTTPObject_received)
-				CACHE_ALL_URLs[url_requested] = ''
 
-				self.request.sendall(self.mitm_response(res))
+		req += '%s\r\n' % self.headers
+		# Append message body if present to the request
 
-			except SocketError as e:
-				if e.errno != errno.ECONNRESET:
-					raise
-				pass
-			# Let's close off the remote end
-			if h != None:
-				h.close()
-			self._proxy_sock.close()
+		if 'Content-Length' in self.headers:
+			req += self.rfile.read(int(self.headers['Content-Length']))
 
-		else:
+		try:
+			# Send it down the pipe!
+			self._proxy_sock.sendall(self.mitm_request(req))
 
-			res = controller.getThisObject(url_requested).prepareObject()
-			try:
-				self.request.sendall(self.mitm_response(res))
-			except SocketError as e:
-				if e.errno != errno.ECONNRESET:
-					raise
-				pass
+			# Parse response
+			h = HTTPResponse(self._proxy_sock)
 
-			# Let's close off the remote end
-			if h != None:
-				h.close()
-			self._proxy_sock.close()
+			h.begin()
+			# Get rid of the pesky header
+			del h.msg['Transfer-Encoding']
+
+			# Time to relay the message across
+			res = '%s %s %s\r\n' % (self.request_version, h.status, h.reason)
+			res += '%s\r\n' % h.msg
+			content_received = h.read()
+			res += content_received
+
+			HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, refrer_requested, 100) # TODO replace the 100 with RTT
+			controller.createObject(HTTPObject_received)
+
+			self.request.sendall(self.mitm_response(res))
+
+		except SocketError as e:
+			if e.errno != errno.ECONNRESET:
+				raise
+			pass
+		# Let's close off the remote end
+		if h != None:
+			h.close()
+		self._proxy_sock.close()
 
 
 	def log_message (self, format, *args):

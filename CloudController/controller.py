@@ -13,12 +13,11 @@ import datetime
 
 from preFetching import ALL_WEBSITES
 
-global fromInternet, ObjectsOnMem, pushToEdgeCache, REQUEST_REFRER, WEB_PAGE_CHANGE_TRACK
+global fromInternet, pushToEdgeCache, REQUEST_REFRER, WEB_PAGE_CHANGE_TRACK
 REQUEST_REFRER = {}
 WEB_PAGE_CHANGE_TRACK = {}
 fromInternet = []
 pushToEdgeCache = []
-ObjectsOnMem = {}
 
 
 def startController():
@@ -143,7 +142,6 @@ class HTTPObject:
 		return res
 
 	def isValidToServe(self):
-
 		if self.webpage == self.url:
 			return False
 
@@ -166,8 +164,6 @@ class HTTPObject:
 		return True
 
 def getThePriority(url):
-
-
 	global WEB_PAGE_CHANGE_TRACK
 	if url in WEB_PAGE_CHANGE_TRACK:
 		return WEB_PAGE_CHANGE_TRACK[url][0]
@@ -184,12 +180,11 @@ def process_FromInternet(number):
 
 			tempObj = fromInternet.pop(0)
 
-			print "11111" , tempObj.webpage, tempObj.url, ALL_WEBSITES
-
 			if tempObj.webpage in ALL_WEBSITES: # the object is part of a webpage that we know
 				if tempObj.url in ALL_WEBSITES[tempObj.webpage].objects: # the object is a one that we have seen before
 					if tempObj.hash != ALL_WEBSITES[tempObj.webpage].objects[tempObj.url].hash: # the hash of the object has changed, we need to update the object
-						processObject(tempObj, ALL_WEBSITES[tempObj.webpage].objects[tempObj.url])
+						continue # TODO: need to process object
+						#processObject(tempObj, ALL_WEBSITES[tempObj.webpage].objects[tempObj.url])
 					else:
 						del tempObj # the object has not changed nothing to be done, we delete this object
 				else: # object is a new one we need to add it to the list of the objects
@@ -198,6 +193,7 @@ def process_FromInternet(number):
 			else:
 				print ("(controller error): an object came with an unknown website ")
 				print tempObj.webpage, tempObj.url, ALL_WEBSITES
+
 
 			#if tempObj.webpage in ALL_WEBSITES:
 			#	print (ALL_WEBSITES[tempObj.webpage].objects.keys())
@@ -223,34 +219,34 @@ def process_FromInternet(number):
 
 
 
-def processObject(currentObject, previousObject):
+# def processObject(currentObject, previousObject):
 
-	global ObjectsOnMem, WEB_PAGE_CHANGE_TRACK
+# 	global ObjectsOnMem, WEB_PAGE_CHANGE_TRACK
 
-	currentTime = time.time()
-	try:
-		previousTime = WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1][currentObject.url][-1]
-	except:
-		print currentObject.url
-		print currentObject.webpage
-		print WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1]
+# 	currentTime = time.time()
+# 	try:
+# 		previousTime = WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1][currentObject.url][-1]
+# 	except:
+# 		print currentObject.url
+# 		print currentObject.webpage
+# 		print WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1]
 
-	difference = currentTime - previousTime
-	WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1][currentObject.url].append(currentTime)
-	print difference
+# 	difference = currentTime - previousTime
+# 	WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1][currentObject.url].append(currentTime)
+# 	print difference
 
-	if difference < WEB_PAGE_CHANGE_TRACK[currentObject.webpage][0]:
-		WEB_PAGE_CHANGE_TRACK[currentObject.webpage][0] = max (difference, 420)
+# 	if difference < WEB_PAGE_CHANGE_TRACK[currentObject.webpage][0]:
+# 		WEB_PAGE_CHANGE_TRACK[currentObject.webpage][0] = max (difference, 420)
 
 
-	if previousObject.canApplyDiff:
-		diff_object = calculateDiff(currentObject, previousObject) #calculate Diff
-		pushToEdgeCache.append(diff_object)
-		ObjectsOnMem[currentObject.url].obj = currentObject
+# 	if previousObject.canApplyDiff:
+# 		diff_object = calculateDiff(currentObject, previousObject) #calculate Diff
+# 		pushToEdgeCache.append(diff_object)
+# 		ObjectsOnMem[currentObject.url].obj = currentObject
 
-	else:
-		pushToEdgeCache.append(currentObject)
-		ObjectsOnMem[currentObject.url].obj = currentObject
+# 	else:
+# 		pushToEdgeCache.append(currentObject)
+# 		ObjectsOnMem[currentObject.url].obj = currentObject
 
 
 
@@ -269,18 +265,6 @@ def calculateDiff(new , old):
 	newO = HTTPObject(new.headers, new.url, patch_text, new.status, new.reason, new.request_ver, new.refrer, 100) # TODO: 100 should be replased with RTT
 	newO.diff = True
 	return newO
-
-
-
-
-def getThisObject(url):
-
-	if url in ObjectsOnMem:
-		return ObjectsOnMem[url].obj
-	return None
-
-
-
 
 
 

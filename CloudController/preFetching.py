@@ -87,12 +87,11 @@ def bootstrap(a):
 					display = Display(visible=1, size=(1920,1080))
 					display.start()
 
-					time.sleep (1)
 					print item, bootstrapSites[item][0]
 					openPage(item)
 
 					bootstrapSites[item][0]-=1
-					bootstrapSites[item][1]=time.time()+10
+					bootstrapSites[item][1]=time.time()+20
 
 					if bootstrapSites[item][0] <=0 :
 						del bootstrapSites[item]
@@ -101,7 +100,7 @@ def bootstrap(a):
 						# add it to the prefetching queue
 
 					display.stop()
-					print "BOOTSTRAPING", ALL_WEBSITES[item].objects.keys()
+					print "BOOTSTRAPING", '\n'.join(ALL_WEBSITES[item].objects.keys())
 		time.sleep(1)
 
 
@@ -145,7 +144,7 @@ def sitesPrefetching (number):
 def receiveLogs(num):
 	global ALL_WEBSITES
 
-	tmp = [('http://yasirzaki.net/', 10)]
+	tmp = [('http://www.cnn.com/', 10)]
 
 	for siteInfo in tmp:
 		if siteInfo[0] in ALL_WEBSITES:
