@@ -1,5 +1,6 @@
 import time
 import thread
+import copy
 
 from pyvirtualdisplay import Display
 from selenium import webdriver
@@ -7,17 +8,18 @@ from selenium.webdriver.common.proxy import *
 import selenium.webdriver.firefox.webdriver as fwb
 import socket as dummysocket
 import cPickle
-import Queue as Q 
-import controller 
+import Queue as Q
+import controller
 global ALL_WEBSITES, All_Webpages
 All_Webpages = Q.PriorityQueue()
 
+maxBootstrap = 30
+bootstrapSites = {}
 ALL_WEBSITES = {}
-ALL_WEBSITES['http://www.yasirzaki.net/'] = ''
-ALL_WEBSITES['http://www.ebay.com/']=''
 
-All_Webpages.put(( time.time() + 0 ,'http://www.yasirzaki.net/'))
-All_Webpages.put(( time.time() + 0 ,'http://www.ebay.com/'))
+#All_Webpages.put(( time.time() + 0 ,'http://www.yasirzaki.net/'))
+#All_Webpages.put(( time.time() + 0 ,'http://www.ebay.com/'))
+
 
 def openPage (webpage):
 
@@ -65,7 +67,7 @@ def openPage (webpage):
 		#print 'Stuck here 2 '
 		browser.get (webpage)
 		time.sleep(0.001)
-	
+
 	del profile
 	print "-- Finished loading ", browser.title
 	browser.quit()
@@ -73,10 +75,41 @@ def openPage (webpage):
 
 
 
+def bootstrap(a):
+	global bootstrapSites
+	print "bootstraping thread started"
+
+	while True:
+		if len (bootstrapSites) > 0:
+
+			for item in bootstrapSites:
+				if bootstrapSites[item][1] <= time.time():
+					display = Display(visible=1, size=(1920,1080))
+					display.start()
+
+					time.sleep (1)
+					print item, bootstrapSites[item][0]
+					openPage(item)
+
+					bootstrapSites[item][0]-=1
+					bootstrapSites[item][1]=time.time()+10
+
+					if bootstrapSites[item][0] <=0 :
+						del bootstrapSites[item]
+
+						# TODO:
+						# add it to the prefetching queue
+
+					display.stop()
+					print "BOOTSTRAPING", ALL_WEBSITES[item].objects.keys()
+		time.sleep(1)
+
+
 
 
 def sitesPrefetching (number):
 	global ALL_WEBSITES, All_Webpages
+
 
 	while True:
 		global ALL_WEBSITES
@@ -84,7 +117,6 @@ def sitesPrefetching (number):
 		display = Display(visible=0, size=(1920,1080))
 		display.start()
 
-		
 		currentTime = time.time()
 
 		a = All_Webpages.get()
@@ -94,7 +126,7 @@ def sitesPrefetching (number):
 
 			print webpage
 			openPage(webpage)
-			
+
 			newPriority = time.time()+controller.getThePriority(webpage)
 			print newPriority
 			All_Webpages.put((newPriority, webpage))
@@ -111,30 +143,43 @@ def sitesPrefetching (number):
 
 
 def receiveLogs(num):
-	global ALL_WEBSITES, All_Webpages
+	global ALL_WEBSITES
 
-	CONTROLLER_IP = '10.225.3.124'
-	CONTROLLER_PORT = 7007
+	tmp = [('http://yasirzaki.net/', 10)]
 
-	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
-	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
-	
-	s.bind((CONTROLLER_IP, CONTROLLER_PORT))
+	for siteInfo in tmp:
+		if siteInfo[0] in ALL_WEBSITES:
+			ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
+		else:
+			bootstrapSites[siteInfo[0]]=[maxBootstrap, 0]
+			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
 
-	while 1:
+	return
 
-		s.listen(1)
-		conn, addr = s.accept()
-		MESSAGE= ""
-		data = conn.recv(1024)
-		
-		while data:
-			MESSAGE += data
-			data = conn.recv(1024)
-		
-		websites = cPickle.loads(MESSAGE)
-		
-		for web in websites:
-			if not (web in ALL_WEBSITES): 
-				ALL_WEBSITES[web] = ''
-				All_Webpages.put(( time.time() + 1800 ,web))
+
+
+	# CONTROLLER_IP = '10.225.3.124'
+	# CONTROLLER_PORT = 7007
+
+	# s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
+	# s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
+
+	# s.bind((CONTROLLER_IP, CONTROLLER_PORT))
+
+	# while 1:
+
+	# 	s.listen(1)
+	# 	conn, addr = s.accept()
+	# 	MESSAGE= ""
+	# 	data = conn.recv(1024)
+
+	# 	while data:
+	# 		MESSAGE += data
+	# 		data = conn.recv(1024)
+
+	# 	websites = cPickle.loads(MESSAGE)
+
+	# 	for web in websites:
+	# 		if not (web in ALL_WEBSITES):
+	# 			ALL_WEBSITES[web] = ''
+	# 			All_Webpages.put(( time.time() + 1800 ,web))

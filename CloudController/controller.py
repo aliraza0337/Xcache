@@ -9,9 +9,11 @@ import random
 import string
 import os
 import diff_match_patch
-import datetime 
+import datetime
 
-global fromInternet, ObjectsOnMem, pushToEdgeCache, REQUEST_REFRER, WEB_PAGE_CHANGE_TRACK 
+from preFetching import ALL_WEBSITES
+
+global fromInternet, ObjectsOnMem, pushToEdgeCache, REQUEST_REFRER, WEB_PAGE_CHANGE_TRACK
 REQUEST_REFRER = {}
 WEB_PAGE_CHANGE_TRACK = {}
 fromInternet = []
@@ -29,12 +31,17 @@ def createObject(objectReceived):
 class MemoryObject:
 	def __init__(self, url, ash, obj):
 		self.url = url
- 		self.hash = ash
- 		self.obj = obj
+		self.hash = ash
+		self.obj = obj
+
+class WebPage:
+	def __init__ (self, Nreq):
+		self.objects = {}
+		self.N = Nreq
 
 
 class HTTPObject:
-	def __init__(self, headers, url, content, status, reason, request_ver, refrer ):
+	def __init__(self, headers, url, content, status, reason, request_ver, refrer, RTT ):
 
 		self.request_ver = request_ver
 		self.headers = headers
@@ -48,12 +55,29 @@ class HTTPObject:
 		self.diff = False
 		self.canApplyDiff = False
 
+		# web object attributes for Utility calculation
+		self.timeToChange = []
+		self.expirationTime = time.time() + self.get_maxAge()
+		self.lastChangeTime = time.time()
+		self.RTT = RTT
+		self.size = len(content)
+
 		#self.lastModified = self.getLastModifiedHeader()
 		self.putRefrerInGlobalList()
 		self.findWebsite()
 		#print 'THAT:' + self.webpage
 		self.computeHash()
 		self.diffCheck()
+
+	def get_maxAge(self):
+
+		return 0 # incase we dont have max-age
+
+	def isX1 (self):
+
+		return True # if the change time > T
+
+		return False # if the change time < T
 
 
 	def findWebsite(self):
@@ -75,14 +99,14 @@ class HTTPObject:
 					#print previous
 					return
 			else:
-				break 
-	
+				break
+
 	def getLocationHeader(self):
 		for h in self.headers:
 			if h[0] == 'location':
 				return h[1]
 
-	
+
 	def putRefrerInGlobalList(self):
 		global REQUEST_REFRER
 
@@ -92,10 +116,10 @@ class HTTPObject:
 			REQUEST_REFRER[self.url] = ''
 
 		if self.url in REQUEST_REFRER:
-			return 
-		else: 
+			return
+		else:
 			REQUEST_REFRER[self.url] = self.refrer
-		return 
+		return
 
 	def getLastModifiedHeader(self):
 		for h in self.headers:
@@ -115,16 +139,16 @@ class HTTPObject:
 		res = '%s %s %s\r\n' % (self.request_ver, self.status, self.reason)
 		for header in self.headers:
 			res += header[0] + ": " + header[1] +"\n"
-		res = res+"\r\n"+self.content	
+		res = res+"\r\n"+self.content
 		return res
-	
+
 	def isValidToServe(self):
-		
+
 		if self.webpage == self.url:
-			return False 
-		
+			return False
+
 		timeStamps = WEB_PAGE_CHANGE_TRACK[self.webpage][1][self.url]
-		
+
 
 		if len(timeStamps) == 1:
 			return True
@@ -132,13 +156,13 @@ class HTTPObject:
 			currentTime = time.time()
 			t1 = timeStamps[-1]
 			t2 = timeStamps[-2]
-			diff1 = t1 - t2 
-			diff2 = currentTime - t1 
-			
+			diff1 = t1 - t2
+			diff2 = currentTime - t1
+
 			if diff2 > diff1:
 				return True
 			else:
-				return False 
+				return False
 		return True
 
 def getThePriority(url):
@@ -148,40 +172,52 @@ def getThePriority(url):
 	if url in WEB_PAGE_CHANGE_TRACK:
 		return WEB_PAGE_CHANGE_TRACK[url][0]
 	else:
-		return 0 
-	return 0 
+		return 0
+	return 0
 
 
 def process_FromInternet(number):
-	global fromInternet, ObjectsOnMem
-	
+	global fromInternet, ALL_WEBSITES
+
 	while 1:
 		if len(fromInternet) != 0:
-			
+
 			tempObj = fromInternet.pop(0)
 
-			if tempObj.url in ObjectsOnMem:
+			print "11111" , tempObj.webpage, tempObj.url, ALL_WEBSITES
 
-				if tempObj.url == "http://api.iperceptions.com/InviteTriggers":
-				print "---2---- ", tempObj.webpage
-
-				if ObjectsOnMem[tempObj.url].hash != tempObj.hash:
-					processObject(tempObj, ObjectsOnMem[tempObj.url].obj)
+			if tempObj.webpage in ALL_WEBSITES: # the object is part of a webpage that we know
+				if tempObj.url in ALL_WEBSITES[tempObj.webpage].objects: # the object is a one that we have seen before
+					if tempObj.hash != ALL_WEBSITES[tempObj.webpage].objects[tempObj.url].hash: # the hash of the object has changed, we need to update the object
+						processObject(tempObj, ALL_WEBSITES[tempObj.webpage].objects[tempObj.url])
+					else:
+						del tempObj # the object has not changed nothing to be done, we delete this object
+				else: # object is a new one we need to add it to the list of the objects
+					ALL_WEBSITES[tempObj.webpage].objects[tempObj.url]=tempObj # added the new object to the list of sites
+					#pushToEdgeCache.append(tempObj)
 			else:
-	
-				if tempObj.url == "http://api.iperceptions.com/InviteTriggers":
-				print "---1---- ", tempObj.webpage
+				print ("(controller error): an object came with an unknown website ")
+				print tempObj.webpage, tempObj.url, ALL_WEBSITES
 
-				if tempObj.webpage in WEB_PAGE_CHANGE_TRACK:
+			#if tempObj.webpage in ALL_WEBSITES:
+			#	print (ALL_WEBSITES[tempObj.webpage].objects.keys())
 
-					WEB_PAGE_CHANGE_TRACK[tempObj.webpage][1][tempObj.url] = [time.time()]
-				else:
 
-					WEB_PAGE_CHANGE_TRACK[tempObj.webpage] = [1800, {}]
-					WEB_PAGE_CHANGE_TRACK[tempObj.webpage][1][tempObj.url] = [time.time()]
-				
-				ObjectsOnMem[tempObj.url] = MemoryObject(tempObj.url,tempObj.hash,	tempObj)
-				pushToEdgeCache.append(tempObj)
+			# if tempObj.url in ObjectsOnMem: # Check if we have seen this object before
+			# 	if ObjectsOnMem[tempObj.url].hash != tempObj.hash:
+			# 		processObject(tempObj, ObjectsOnMem[tempObj.url].obj)
+			# else:
+
+			# 	if tempObj.webpage in WEB_PAGE_CHANGE_TRACK:
+
+			# 		WEB_PAGE_CHANGE_TRACK[tempObj.webpage][1][tempObj.url] = [time.time()]
+			# 	else:
+
+			# 		WEB_PAGE_CHANGE_TRACK[tempObj.webpage] = [1800, {}]
+			# 		WEB_PAGE_CHANGE_TRACK[tempObj.webpage][1][tempObj.url] = [time.time()]
+
+			# 	ObjectsOnMem[tempObj.url] = MemoryObject(tempObj.url,tempObj.hash,	tempObj)
+			# 	pushToEdgeCache.append(tempObj)
 
 
 
@@ -202,17 +238,17 @@ def processObject(currentObject, previousObject):
 	difference = currentTime - previousTime
 	WEB_PAGE_CHANGE_TRACK[currentObject.webpage][1][currentObject.url].append(currentTime)
 	print difference
-	
+
 	if difference < WEB_PAGE_CHANGE_TRACK[currentObject.webpage][0]:
 		WEB_PAGE_CHANGE_TRACK[currentObject.webpage][0] = max (difference, 420)
 
 
 	if previousObject.canApplyDiff:
-		diff_object = calculateDiff(currentObject, previousObject) #calculate Diff 
+		diff_object = calculateDiff(currentObject, previousObject) #calculate Diff
 		pushToEdgeCache.append(diff_object)
 		ObjectsOnMem[currentObject.url].obj = currentObject
-	
-	else: 
+
+	else:
 		pushToEdgeCache.append(currentObject)
 		ObjectsOnMem[currentObject.url].obj = currentObject
 
@@ -221,16 +257,16 @@ def processObject(currentObject, previousObject):
 def calculateDiff(new , old):
 
 	old_content = old.content.decode('utf-8')
-	new_content = new.content.decode('utf-8')	
+	new_content = new.content.decode('utf-8')
 	var = diff_match_patch.diff_match_patch()
 	diff = var.diff_main(old_content, new_content ,  True)
-	
+
 	if len(diff) > 2:
 		var.diff_cleanupSemantic(diff)
-	
+
 	patch_list = var.patch_make(old_content, new_content, diff)
 	patch_text = var.patch_toText(patch_list)
-	newO = HTTPObject(new.headers, new.url, patch_text, new.status, new.reason, new.request_ver, new.refrer)
+	newO = HTTPObject(new.headers, new.url, patch_text, new.status, new.reason, new.request_ver, new.refrer, 100) # TODO: 100 should be replased with RTT
 	newO.diff = True
 	return newO
 
@@ -250,17 +286,22 @@ def getThisObject(url):
 
 def sendToEdgeCache(number):
 	global pushToEdgeCache
-	EdgeCache_IP = '10.230.240.204'
+	EdgeCache_IP = '10.224.40.169' # '195.229.110.139'
 	EdgeCache_PORT = 60002
+
+	print "Pushing to edge cache"
 
 	while True:
 		if len(pushToEdgeCache) > 0:
+
 			edgeObject = pushToEdgeCache.pop(0)
 			MESSAGE = cPickle.dumps(edgeObject)
+
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect((EdgeCache_IP, EdgeCache_PORT))
+
 			s.sendall(MESSAGE)
-			print "Pushing content"
+			#print "Pushing content"
 			s.close()
 			del s
 		time.sleep(0.010)
