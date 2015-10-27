@@ -48,23 +48,12 @@ def openPage (webpage):
 	profile.update_preferences()
 
 	browser = webdriver.Firefox(firefox_profile=profile, firefox_binary=binary, proxy=proxy)
-
-
 	browser.implicitly_wait(50)
 	browser.set_page_load_timeout(100)
 
 	browser.set_window_size(1920, 1080)
 	browser.get (webpage)
 	while browser.title == "Problem loading page":
-		#print 'Stuck here'
-		browser.get (webpage)
-		time.sleep(0.001)
-
-	time.sleep(1)
-	browser.set_window_size(1024, 768)
-	browser.get (webpage)
-	while browser.title == "Problem loading page":
-		#print 'Stuck here 2 '
 		browser.get (webpage)
 		time.sleep(0.001)
 
@@ -84,12 +73,9 @@ def bootstrap(a):
 
 			for item in bootstrapSites:
 				if bootstrapSites[item][1] <= time.time():
-					display = Display(visible=1, size=(1920,1080))
+					display = Display(visible=0, size=(1920,1080))
 					display.start()
-
-					print item, bootstrapSites[item][0]
 					openPage(item)
-
 					bootstrapSites[item][0]-=1
 					bootstrapSites[item][1]=time.time()+20
 
@@ -100,7 +86,6 @@ def bootstrap(a):
 						# add it to the prefetching queue
 
 					display.stop()
-					print "BOOTSTRAPING", '\n'.join(ALL_WEBSITES[item].objects.keys())
 		time.sleep(1)
 
 
@@ -112,7 +97,6 @@ def sitesPrefetching (number):
 
 	while True:
 		global ALL_WEBSITES
-		print 'Here'
 		display = Display(visible=0, size=(1920,1080))
 		display.start()
 
@@ -126,12 +110,12 @@ def sitesPrefetching (number):
 			print webpage
 			openPage(webpage)
 
-			newPriority = time.time()+controller.getThePriority(webpage)
+			#newPriority = time.time()+controller.getThePriority(webpage)
 			print newPriority
 			All_Webpages.put((newPriority, webpage))
 			display.stop()
 		else:
-			newPriority = time.time()+controller.getThePriority(webpage)
+			#newPriority = time.time()+controller.getThePriority(webpage)
 			All_Webpages.put((newPriority, webpage))
 		#time.time(30)
 
