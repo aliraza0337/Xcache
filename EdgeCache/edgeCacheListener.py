@@ -2,6 +2,7 @@ import os
 import cPickle
 from threading import Thread 
 import socket as dummysocket
+import time 
 import diff_match_patch
 import reportLogs 
 import edgeCacheObject 
@@ -23,7 +24,7 @@ def startfunc():
 
 def listenFromController(num):
 
-	EdgeCache_IP = "10.230.240.204"
+	EdgeCache_IP = "127.0.0.1"
 	EdgeCache_Port = 60002
 
 	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
@@ -58,7 +59,7 @@ def push_in_cache(edgeObject, mode):
 	f.close()
 
 	#path = 'cache/Object'+mode+'.txt'
-	command = 'sudo ./tspush -f cache/Object.txt -u http://127.0.0.1:60001 -s '+edgeObject.url
+	#command = 'sudo ./tspush -f cache/Object.txt -u http://127.0.0.1:60001 -s '+edgeObject.url
 	os.system(command)
 	os.system('rm cache/*')
 

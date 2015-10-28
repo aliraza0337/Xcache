@@ -22,8 +22,8 @@ PUSH_TO_EDGE_CACHE = []
 
 
 def startController():
-	thread.start_new_thread(process_FromInternet, (1,))
-	#thread.start_new_thread(sendToEdgeCache, (1,))
+	thread.start_new_thread( process_FromInternet, (1,))
+	thread.start_new_thread( sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	FROM_INTERNET.append(objectReceived)
@@ -134,7 +134,7 @@ class HTTPObject:
 		self.hash = obj.hash
 		self.expirationTime = time.time() + float(self.maxAge)
 		self.lastChangeTime = time.time()
-		self.size = len(content)
+		self.size = len(self.content)
 	
 
 
@@ -162,13 +162,19 @@ def process_FromInternet(number):
 				# object is a new one we need to add it to the list of the objects
 					# added the new object to the list of sites
 					ALL_WEBSITES[tempObj.webpage].objects[tempObj.url]=tempObj 
-					#PUSH_TO_EDGE_CACHE.append(tempObj)
+					PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(
+												tempObj.headers, 
+											    tempObj.url, 
+											    tempObj.content, 
+												tempObj.status,
+												tempObj.reason, 
+												tempObj.request_ver, 
+												False) )
 			else:
 				pass
 				#print ("(controller error): an object came with an unknown website ")
 				#print tempObj.webpage, tempObj.url
-
-
+				PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers, tempObj.url, tempObj.content, tempObj.status, tempObj.reason, tempObj.request_ver, False))
 
 def processObject(currentObject, previousObject):
 	currentTime = time.time()
@@ -214,24 +220,18 @@ def calculateDiff(new , old):
 
 
 
-# def sendToEdgeCache(number):
-# 	global PUSH_TO_EDGE_CACHE
-# 	EdgeCache_IP = '10.224.40.169' # '195.229.110.139'
-# 	EdgeCache_PORT = 60002
-
-# 	print "Pushing to edge cache"
-
-# 	while True:
-# 		if len(PUSH_TO_EDGE_CACHE) > 0:
-
-# 			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
-# 			MESSAGE = cPickle.dumps(edgeObject)
-
-# 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# 			s.connect((EdgeCache_IP, EdgeCache_PORT))
-
-# 			s.sendall(MESSAGE)
-# 			#print "Pushing content"
-# 			s.close()
-# 			del s
-# 		time.sleep(0.010)
+def sendToEdgeCache(number):
+	global PUSH_TO_EDGE_CACHE
+	EdgeCache_IP = '127.0.0.1' # '195.229.110.139'
+	EdgeCache_PORT = 60002
+	while True:
+		if len(PUSH_TO_EDGE_CACHE) > 0:
+			print 'sending'
+			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
+			MESSAGE = cPickle.dumps(edgeObject)
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect((EdgeCache_IP, EdgeCache_PORT))
+			s.sendall(MESSAGE)
+			s.close()
+			del s
+		time.sleep(0.010)
