@@ -11,6 +11,7 @@ import os
 import diff_match_patch
 import datetime
 import sys
+import edgeCacheObject
 from preFetching import ALL_WEBSITES
 
 global FROM_INTERNET, PUSH_TO_EDGE_CACHE, REQUEST_REFRER, WEB_PAGE_CHANGE_TRACK
@@ -146,18 +147,21 @@ def process_FromInternet(number):
 		if len(FROM_INTERNET) != 0:
 			tempObj = FROM_INTERNET.pop(0)
 
-			if tempObj.webpage in ALL_WEBSITES: # the object is part of a webpage that we know
-				if tempObj.url in ALL_WEBSITES[tempObj.webpage].objects: # the object is a one that we have seen before
-					if tempObj.hash != ALL_WEBSITES[tempObj.webpage].objects[tempObj.url].hash: # the hash of the object has changed, we need to update the object
-						continue  # TODO: need to process object
+			if tempObj.webpage in ALL_WEBSITES: 
+			# the object is part of a webpage that we know
+				if tempObj.url in ALL_WEBSITES[tempObj.webpage].objects: 
+				# the object is a one that we have seen before
+					if tempObj.hash != ALL_WEBSITES[tempObj.webpage].objects[tempObj.url].hash: 
+					# the hash of the object has changed, we need to update the object
 						processObject(tempObj, ALL_WEBSITES[tempObj.webpage].objects[tempObj.url])
 					else:
-						del tempObj # the object has not changed nothing to be done, we delete this object
-				
+						del tempObj 
+						# the object has not changed nothing to be done, we delete this object
 
-
-				else: # object is a new one we need to add it to the list of the objects
-					ALL_WEBSITES[tempObj.webpage].objects[tempObj.url]=tempObj # added the new object to the list of sites
+				else: 
+				# object is a new one we need to add it to the list of the objects
+					# added the new object to the list of sites
+					ALL_WEBSITES[tempObj.webpage].objects[tempObj.url]=tempObj 
 					#PUSH_TO_EDGE_CACHE.append(tempObj)
 			else:
 				pass
@@ -194,28 +198,38 @@ def processObject(currentObject, previousObject):
 	if currentObject.canApplyDiff and previousObject.canApplyDiff:
 		object_to_send = calculateDiff(currentObject, previousObject) #calculate Diff
 	else:
-		object_to_send = currentObject
+		object_to_send = edgeCacheObject.EdgeObject(currentObject.headers, 
+													currentObject.url, 
+													currentObject.content, 
+													currentObject.status,
+													currentObject.reason, 
+													currentObject.request_ver, 
+													False)
 
 	previousObject.addTimeStamp(currentTime)
 	previousObject.copyObject(currentObject)
 	PUSH_TO_EDGE_CACHE.append(object_to_send)
+
+
+def calculateDiff(new , old):
+	old_content = old.content.decode('utf-8')
+	new_content = new.content.decode('utf-8')
+	var = diff_match_patch.diff_match_patch()
+	diff = var.diff_main(old_content, new_content ,  True)
 	
-
-# def calculateDiff(new , old):
-
-# 	old_content = old.content.decode('utf-8')
-# 	new_content = new.content.decode('utf-8')
-# 	var = diff_match_patch.diff_match_patch()
-# 	diff = var.diff_main(old_content, new_content ,  True)
-
-# 	if len(diff) > 2:
-# 		var.diff_cleanupSemantic(diff)
-
-# 	patch_list = var.patch_make(old_content, new_content, diff)
-# 	patch_text = var.patch_toText(patch_list)
-# 	newO = HTTPObject(new.headers, new.url, patch_text, new.status, new.reason, new.request_ver, new.refrer, 100) # TODO: 100 should be replased with RTT
-# 	newO.diff = True
-# 	return newO
+	if len(diff) > 2:
+		var.diff_cleanupSemantic(diff)
+	
+	patch_list = var.patch_make(old_content, new_content, diff)
+	patch_text = var.patch_toText(patch_list)
+	newO = edgeCacheObject.EdgeObject(	new.headers, 
+										new.url, 
+										patch_text, 
+										new.status,
+										new.reason, 
+										new.request_ver, 
+										True)
+	return newO
 
 
 
