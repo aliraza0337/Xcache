@@ -10,16 +10,12 @@ import socket as dummysocket
 import cPickle
 import Queue as Q
 import controller
-global ALL_WEBSITES, All_Webpages
-All_Webpages = Q.PriorityQueue()
+global ALL_WEBSITES, PREFETCHING_QUEUE
+PREFETCHING_QUEUE = Q.PriorityQueue()
 
 maxBootstrap = 30
 bootstrapSites = {}
 ALL_WEBSITES = {}
-
-#All_Webpages.put(( time.time() + 0 ,'http://www.yasirzaki.net/'))
-#All_Webpages.put(( time.time() + 0 ,'http://www.ebay.com/'))
-
 
 def openPage (webpage):
 
@@ -92,32 +88,20 @@ def bootstrap(a):
 
 
 def sitesPrefetching (number):
-	global ALL_WEBSITES, All_Webpages
 
-
+	global PREFETCHING_QUEUE
+	newPriority = 0 
 	while True:
-		global ALL_WEBSITES
 		display = Display(visible=0, size=(1920,1080))
 		display.start()
-
 		currentTime = time.time()
-
-		a = All_Webpages.get()
-		print a[1]
-		if a[0] < currentTime+10:
-			webpage = a[1]
-
-			print webpage
-			openPage(webpage)
-
-			#newPriority = time.time()+controller.getThePriority(webpage)
-			print newPriority
-			All_Webpages.put((newPriority, webpage))
+		a = PREFETCHING_QUEUE.get()
+		
+		if a[0] < currentTime+10: 
+			openPage(a[1])
 			display.stop()
 		else:
-			#newPriority = time.time()+controller.getThePriority(webpage)
-			All_Webpages.put((newPriority, webpage))
-		#time.time(30)
+			PREFETCHING_QUEUE.put((newPriority, webpage))
 
 
 
@@ -165,4 +149,4 @@ def receiveLogs(num):
 	# 	for web in websites:
 	# 		if not (web in ALL_WEBSITES):
 	# 			ALL_WEBSITES[web] = ''
-	# 			All_Webpages.put(( time.time() + 1800 ,web))
+	# 			PREFETCHING_QUEUE.put(( time.time() + 1800 ,web))

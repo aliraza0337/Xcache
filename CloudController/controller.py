@@ -168,28 +168,6 @@ def process_FromInternet(number):
 				#print ("(controller error): an object came with an unknown website ")
 				#print tempObj.webpage, tempObj.url
 
-			#if tempObj.webpage in ALL_WEBSITES:
-			#	print (ALL_WEBSITES[tempObj.webpage].objects.keys())
-
-
-			# if tempObj.url in ObjectsOnMem: # Check if we have seen this object before
-			# 	if ObjectsOnMem[tempObj.url].hash != tempObj.hash:
-			# 		processObject(tempObj, ObjectsOnMem[tempObj.url].obj)
-			# else:
-
-			# 	if tempObj.webpage in WEB_PAGE_CHANGE_TRACK:
-
-			# 		WEB_PAGE_CHANGE_TRACK[tempObj.webpage][1][tempObj.url] = [time.time()]
-			# 	else:
-
-			# 		WEB_PAGE_CHANGE_TRACK[tempObj.webpage] = [1800, {}]
-			# 		WEB_PAGE_CHANGE_TRACK[tempObj.webpage][1][tempObj.url] = [time.time()]
-
-			# 	ObjectsOnMem[tempObj.url] = MemoryObject(tempObj.url,tempObj.hash,	tempObj)
-			# 	PUSH_TO_EDGE_CACHE.append(tempObj)
-
-
-
 
 
 def processObject(currentObject, previousObject):
@@ -205,10 +183,12 @@ def processObject(currentObject, previousObject):
 													currentObject.reason, 
 													currentObject.request_ver, 
 													False)
-
+	PUSH_TO_EDGE_CACHE.append(object_to_send)
 	previousObject.addTimeStamp(currentTime)
 	previousObject.copyObject(currentObject)
-	PUSH_TO_EDGE_CACHE.append(object_to_send)
+	
+
+
 
 
 def calculateDiff(new , old):
@@ -230,6 +210,7 @@ def calculateDiff(new , old):
 										new.request_ver, 
 										True)
 	return newO
+
 
 
 

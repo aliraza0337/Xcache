@@ -4,12 +4,12 @@ from threading import Thread
 import socket as dummysocket
 import diff_match_patch
 import reportLogs 
+import edgeCacheObject 
 global ALL_OBJECTS , PUSH_TO_CACHE, PREVIOUS_OBJECTS 
-##
+
 ALL_OBJECTS = [] 
 PUSH_TO_CACHE = []
 PREVIOUS_OBJECTS = {}
-##
 
 
 def startfunc():	
@@ -29,7 +29,7 @@ def listenFromController(num):
 	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
 	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
 	s.bind((EdgeCache_IP, EdgeCache_Port))
-	#os.system('clear')
+
 	print 'Listening ....'
 	while 1:
 		s.listen(1)
@@ -63,13 +63,6 @@ def push_in_cache(edgeObject, mode):
 	os.system('rm cache/*')
 
 
-# def pushToECache(num):
-# 	global PUSH_TO_CACHE
-# 	while 1:
-# 		if len(PUSH_TO_CACHE) > 0:
-# 			httpObject = PUSH_TO_CACHE.pop(0)
-# 			push_in_cache(httpObject)
-
 
 def applyDiff(obj):
 
@@ -82,7 +75,6 @@ def applyDiff(obj):
 
 	old_content = newObject.content.decode('utf-8')
 	diff = obj.content 
-
 
 	var = diff_match_patch.diff_match_patch()
 	patches = var.patch_fromText(diff)
