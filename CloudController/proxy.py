@@ -14,7 +14,9 @@ from sys import argv
 import errno
 import thread
 import controller
+import time 
 from preFetching import *
+
 
 from OpenSSL.crypto import (X509Extension, X509, dump_privatekey, dump_certificate, load_certificate, load_privatekey,
 							PKey, TYPE_RSA, X509Req)
@@ -210,8 +212,6 @@ class ProxyHandler(BaseHTTPRequestHandler):
 			except Exception, e:
 				self.send_error(500, str(e))
 				return
-			# Extract path
-			# Build request
 
 		req = '%s %s %s\r\n' % (self.command, self.path, self.request_version)
 
@@ -228,12 +228,12 @@ class ProxyHandler(BaseHTTPRequestHandler):
 			req += self.rfile.read(int(self.headers['Content-Length']))
 
 		try:
+			time_a = time.time()
 			# Send it down the pipe!
 			self._proxy_sock.sendall(self.mitm_request(req))
-
 			# Parse response
 			h = HTTPResponse(self._proxy_sock)
-
+			time_b = float(time.time() - time_a)
 			h.begin()
 			# Get rid of the pesky header
 			del h.msg['Transfer-Encoding']
@@ -243,8 +243,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 			res += '%s\r\n' % h.msg
 			content_received = h.read()
 			res += content_received
-
-			HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, refrer_requested, 100) # TODO replace the 100 with RTT
+			HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, refrer_requested, time_b) # TODO replace the 100 with RTT
 			controller.createObject(HTTPObject_received)
 
 			self.request.sendall(self.mitm_response(res))
@@ -333,11 +332,9 @@ class MitmProxyHandler(ProxyHandler):
 class DebugInterceptor(RequestInterceptorPlugin, ResponseInterceptorPlugin):
 
 		def do_request(self, data):
-			#print '>> %s' % repr(data[:100])
 			return data
 
 		def do_response(self, data):
-			#print '<< %s' % repr(data[:100])
 			return data
 
 
@@ -353,9 +350,7 @@ if __name__ == '__main__':
 		proxy = AsyncMitmProxy(ca_file=argv[1])
 	proxy.register_interceptor(DebugInterceptor)
 	try:
-		#thread.start_new_thread(sitesPrefetching, (1,))
-		thread.start_new_thread(bootstrap, (1,))
-		thread.start_new_thread(receiveLogs, (1,))
+		thread.start_new_thread(startPrefetching, (1,))
 		proxy.serve_forever()
 	except KeyboardInterrupt:
 		proxy.server_close()

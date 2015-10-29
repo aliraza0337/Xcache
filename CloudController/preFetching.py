@@ -11,11 +11,20 @@ import cPickle
 import Queue as Q
 import controller
 global ALL_WEBSITES, PREFETCHING_QUEUE
-PREFETCHING_QUEUE = Q.PriorityQueue()
+PREFETCHING_QUEUE = []
 
-maxBootstrap = 30
-bootstrapSites = {}
+MAX_BOOTSTRAP  = 30
+BOOTSTRAPSITES  = {}
 ALL_WEBSITES = {}
+TIME = 1800 #Time Interval 
+
+
+def startPrefetching(num):
+	thread.start_new_thread(receiveLogs, (1,))
+	thread.start_new_thread(bootstrap, (1,))
+	#thread.start_new_thread(sitesPrefetching, (1,))
+
+
 
 def openPage (webpage):
 
@@ -61,25 +70,26 @@ def openPage (webpage):
 
 
 def bootstrap(a):
-	global bootstrapSites
-	print "bootstraping thread started"
+	global BOOTSTRAPSITES 
+	print "Bootstraping thread started\n"
 
 	while True:
-		if len (bootstrapSites) > 0:
+		if len (BOOTSTRAPSITES ) > 0:
 
-			for item in bootstrapSites:
-				if bootstrapSites[item][1] <= time.time():
+			for item in BOOTSTRAPSITES :
+				
+				if BOOTSTRAPSITES [item][1] <= time.time():
 					display = Display(visible=0, size=(1920,1080))
 					display.start()
+					
 					openPage(item)
-					bootstrapSites[item][0]-=1
-					bootstrapSites[item][1]=time.time()+20
+					
+					BOOTSTRAPSITES [item][0]-=1
+					BOOTSTRAPSITES [item][1]=time.time()+20
 
-					if bootstrapSites[item][0] <=0 :
-						del bootstrapSites[item]
-
-						# TODO:
-						# add it to the prefetching queue
+					if BOOTSTRAPSITES [item][0] <=0 :
+						PREFETCHING_QUEUE.append(item)
+						del BOOTSTRAPSITES [item]
 
 					display.stop()
 		time.sleep(1)
@@ -89,20 +99,23 @@ def bootstrap(a):
 
 def sitesPrefetching (number):
 
-	global PREFETCHING_QUEUE
-	newPriority = 0 
 	while True:
-		display = Display(visible=0, size=(1920,1080))
-		display.start()
-		currentTime = time.time()
-		a = PREFETCHING_QUEUE.get()
-		
-		if a[0] < currentTime+10: 
-			openPage(a[1])
-			display.stop()
-		else:
-			PREFETCHING_QUEUE.put((newPriority, webpage))
+		global PREFETCHING_QUEUE , TIME 
 
+		currentTime = time.time()
+		
+		for item in PREFETCHING_QUEUE:
+
+			display = Display(visible=0, size=(1920,1080))
+			display.start()
+			currentTime = time.time()
+			#calculate utility for item 
+			#if > a threshold just fetch 
+			#or sort them according to this and then fetch
+		
+		time_elapsed =  time.time() - currentTime
+		if time_elapsed < TIME:
+			time.sleep(TIME - time_elapsed)
 
 
 
@@ -118,7 +131,7 @@ def receiveLogs(num):
 		if siteInfo[0] in ALL_WEBSITES:
 			ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
 		else:
-			bootstrapSites[siteInfo[0]]=[maxBootstrap, 0]
+			BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
 			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
 
 	return
