@@ -19,7 +19,7 @@ REQUEST_REFRER = {}
 WEB_PAGE_CHANGE_TRACK = {}
 FROM_INTERNET = []
 PUSH_TO_EDGE_CACHE = []
-
+BW = 100
 
 def startController():
 	thread.start_new_thread( process_FromInternet, (1,))
@@ -123,8 +123,11 @@ class HTTPObject:
 		return False # if the change time < T
 	
 	def addTimeStamp(self, time):
-		self.timeToChange.append(time)
-	
+		self.timeToChange.append( time.time()- lastChangeTime)
+		lastChangeTime = time.time()
+		self.timeToChange.sort()
+
+
 	def copyObject(self, obj):
 		self.request_ver = obj.request_ver
 		self.headers = obj.headers
@@ -137,10 +140,33 @@ class HTTPObject:
 		self.lastChangeTime = time.time()
 		self.size = len(self.content)
 	
-	
-	def calculateUtilities():
-		timeBased = 0 
-		bandwidthBased = 0 
+	def calculateP(self):
+
+		currentTime = time.time()
+		time_elapsed = currentTime - self.lastChangeTime
+		counter = 0 
+		
+		for a in self.timeToChange:
+			if time_elapsed > a:
+				counter = counter + 1
+
+		if counter == 0:
+			return 0 
+		else:
+			return float (counter/len(newArray))
+
+	def calculateUtilities(self):
+		N_req = ALL_WEBSITES[self.webpage]
+		bandwidth = BW
+		q = 0  
+		if lastChangeTime < expirationTime:
+			q = 1 
+			
+		p = float(self.calculateP())
+
+		timeBased = 
+		bandwidthBased = 0
+
 
 		return timeBased, bandwidthBased
 
