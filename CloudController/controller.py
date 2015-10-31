@@ -156,19 +156,25 @@ class HTTPObject:
 			return float (counter/len(newArray))
 
 	def calculateUtilities(self):
-		N_req = ALL_WEBSITES[self.webpage]
+		N_req = ALL_WEBSITES[self.webpage].N
 		bandwidth = BW
 		q = 0  
 		if lastChangeTime < expirationTime:
 			q = 1 
-			
 		p = float(self.calculateP())
+		#
+		delta = 1
+		n_t = N_req * q(self.RTT + p(self.size/BW))
+		n_b = N_req * q * p * self.size
 
-		timeBased = 
-		bandwidthBased = 0
+		if self.isX1():
+			timeBased = (p*delta*self.size)/BW
+			bandwidthBased = (p*delta*self.size)
+		else:
+			timeBased = n_t
+			bandwidthBased = n_b
 
-
-		return timeBased, bandwidthBased
+		return n_t, timeBased, n_b, bandwidthBased
 
 
 def process_FromInternet(number):

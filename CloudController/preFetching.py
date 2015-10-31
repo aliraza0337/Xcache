@@ -10,8 +10,9 @@ import socket as dummysocket
 import cPickle
 import Queue as Q
 import controller
-global ALL_WEBSITES, PREFETCHING_QUEUE
-PREFETCHING_QUEUE = []
+global ALL_WEBSITES, PREFETCHING_QUEUE, PREFETCHING_LIST 
+PREFETCHING_LIST = []
+PREFETCHING_QUEUE = Q.PriorityQueue()
 
 MAX_BOOTSTRAP  = 30
 BOOTSTRAPSITES  = {}
@@ -88,7 +89,7 @@ def bootstrap(a):
 					BOOTSTRAPSITES [item][1]=time.time()+20
 
 					if BOOTSTRAPSITES [item][0] <=0 :
-						PREFETCHING_QUEUE.append(item)
+						PREFETCHING_LIST.append(item)
 						del BOOTSTRAPSITES [item]
 
 					display.stop()
@@ -97,15 +98,21 @@ def bootstrap(a):
 
 
 
+
+
+
+
+
+
 def sitesPrefetching (number):
 
 	while True:
+
 		global PREFETCHING_QUEUE , TIME 
-
 		currentTime = time.time()
-		
-		for item in PREFETCHING_QUEUE:
-
+		while not PREFETCHING_QUEUE.empty():
+			w = PREFETCHING_QUEUE.get()
+			openPage(w)
 			display = Display(visible=0, size=(1920,1080))
 			display.start()
 			currentTime = time.time()
@@ -135,6 +142,28 @@ def receiveLogs(num):
 			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
 
 	return
+
+
+
+
+def calculateUtilities():
+	global ALL_WEBSITES, PREFETCHING_QUEUE, PREFETCHING_LIST
+	PREFETCHING_QUEUE =  Q.PriorityQueue()
+
+	for webpage in PREFETCHING_LIST:
+		n_t = float(0.00)
+		d_t = float(0.00)
+		n_b = float(0.00)
+		d_b = float(0.00)
+		for o in ALL_WEBSITES[webpage]:
+			x1, x2, x3, x4 = o.calculateUtilities()
+			n_t = n_t + x1 
+			d_t = d_t + x2 
+			n_b = n_b + x3  
+			d_b = d_b + x4
+		t = float(float(n_t/d_t) + float(n_b/d_b))
+		PREFETCHING_QUEUE.put((t, webpage))
+
 
 
 
