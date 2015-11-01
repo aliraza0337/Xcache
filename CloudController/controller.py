@@ -122,9 +122,9 @@ class HTTPObject:
 		return True # if the change time > T
 		return False # if the change time < T
 	
-	def addTimeStamp(self, time):
-		self.timeToChange.append( time.time()- lastChangeTime)
-		lastChangeTime = time.time()
+	def addTimeStamp(self, t):
+		self.timeToChange.append( t - self.lastChangeTime)
+		self.lastChangeTime = t
 		self.timeToChange.sort()
 
 
@@ -151,25 +151,29 @@ class HTTPObject:
 				counter = counter + 1
 
 		if counter == 0:
-			return 0 
+			return 0.0001
 		else:
 			return float (counter/len(newArray))
 
 	def calculateUtilities(self):
+		global ALL_WEBSITES, BW
+
 		N_req = ALL_WEBSITES[self.webpage].N
 		bandwidth = BW
 		q = 0  
-		if lastChangeTime < expirationTime:
+		if self.lastChangeTime < self.expirationTime:
 			q = 1 
 		p = float(self.calculateP())
 		#
 		delta = 1
-		n_t = N_req * q(self.RTT + p(self.size/BW))
+		n_t = N_req * q * (self.RTT + p*(self.size/BW))
 		n_b = N_req * q * p * self.size
 
 		if self.isX1():
 			timeBased = (p*delta*self.size)/BW
+			print ('here', timeBased, p, delta, self.size, BW) 
 			bandwidthBased = (p*delta*self.size)
+			print bandwidthBased
 		else:
 			timeBased = n_t
 			bandwidthBased = n_b

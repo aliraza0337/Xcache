@@ -14,7 +14,7 @@ global ALL_WEBSITES, PREFETCHING_QUEUE, PREFETCHING_LIST
 PREFETCHING_LIST = []
 PREFETCHING_QUEUE = Q.PriorityQueue()
 
-MAX_BOOTSTRAP  = 30
+MAX_BOOTSTRAP  = 1
 BOOTSTRAPSITES  = {}
 ALL_WEBSITES = {}
 TIME = 1800 #Time Interval 
@@ -23,7 +23,7 @@ TIME = 1800 #Time Interval
 def startPrefetching(num):
 	thread.start_new_thread(receiveLogs, (1,))
 	thread.start_new_thread(bootstrap, (1,))
-	#thread.start_new_thread(sitesPrefetching, (1,))
+	thread.start_new_thread(sitesPrefetching, (1,))
 
 
 
@@ -79,6 +79,9 @@ def bootstrap(a):
 
 			for item in BOOTSTRAPSITES :
 				
+				if BOOTSTRAPSITES[item][0] <= 0:
+					continue
+
 				if BOOTSTRAPSITES [item][1] <= time.time():
 					display = Display(visible=0, size=(1920,1080))
 					display.start()
@@ -89,8 +92,8 @@ def bootstrap(a):
 					BOOTSTRAPSITES [item][1]=time.time()+20
 
 					if BOOTSTRAPSITES [item][0] <=0 :
+						print 'Added to PREFETCHING_LIST'
 						PREFETCHING_LIST.append(item)
-						del BOOTSTRAPSITES [item]
 
 					display.stop()
 		time.sleep(1)
@@ -105,24 +108,26 @@ def bootstrap(a):
 
 
 def sitesPrefetching (number):
-
+	PREFETCHING_BOOL = False
 	while True:
 
-		global PREFETCHING_QUEUE , TIME 
+		global PREFETCHING_QUEUE , TIME, PREFETCHING_LIST
 		currentTime = time.time()
+		calculateUtilities()
+		
 		while not PREFETCHING_QUEUE.empty():
+			PREFETCHING_BOOL = True 
 			w = PREFETCHING_QUEUE.get()
 			openPage(w)
 			display = Display(visible=0, size=(1920,1080))
 			display.start()
 			currentTime = time.time()
-			#calculate utility for item 
-			#if > a threshold just fetch 
-			#or sort them according to this and then fetch
-		
-		time_elapsed =  time.time() - currentTime
-		if time_elapsed < TIME:
-			time.sleep(TIME - time_elapsed)
+			display.stop()
+
+		if PREFETCHING_BOOL:
+			time_elapsed =  time.time() - currentTime
+			if time_elapsed < TIME:
+				time.sleep(TIME - time_elapsed)
 
 
 
@@ -149,21 +154,22 @@ def receiveLogs(num):
 def calculateUtilities():
 	global ALL_WEBSITES, PREFETCHING_QUEUE, PREFETCHING_LIST
 	PREFETCHING_QUEUE =  Q.PriorityQueue()
-
 	for webpage in PREFETCHING_LIST:
+		print 'calculateUtilities'
 		n_t = float(0.00)
 		d_t = float(0.00)
 		n_b = float(0.00)
 		d_b = float(0.00)
-		for o in ALL_WEBSITES[webpage]:
-			x1, x2, x3, x4 = o.calculateUtilities()
+		for o in ALL_WEBSITES[webpage].objects:
+			x1, x2, x3, x4 = ALL_WEBSITES[webpage].objects[o].calculateUtilities()
+			print (x1, x2 ,x3, x4)
 			n_t = n_t + x1 
 			d_t = d_t + x2 
 			n_b = n_b + x3  
 			d_b = d_b + x4
 		t = float(float(n_t/d_t) + float(n_b/d_b))
+		print 'PriorityQueue'
 		PREFETCHING_QUEUE.put((t, webpage))
-
 
 
 
