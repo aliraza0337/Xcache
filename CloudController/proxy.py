@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 from urlparse import urlparse, urlunparse, ParseResult
 from SocketServer import ThreadingMixIn
@@ -16,34 +15,9 @@ import thread
 import controller
 import time 
 from preFetching import *
-
-
 from OpenSSL.crypto import (X509Extension, X509, dump_privatekey, dump_certificate, load_certificate, load_privatekey,
 							PKey, TYPE_RSA, X509Req)
 from OpenSSL.SSL import FILETYPE_PEM
-
-__author__ = 'Nadeem Douba'
-__copyright__ = 'Copyright 2012, PyMiProxy Project'
-__credits__ = ['Nadeem Douba']
-
-__license__ = 'GPL'
-__version__ = '0.1'
-__maintainer__ = 'Nadeem Douba'
-__email__ = 'ndouba@gmail.com'
-__status__ = 'Development'
-
-__all__ = [
-	'CertificateAuthority',
-	'ProxyHandler',
-	'RequestInterceptorPlugin',
-	'ResponseInterceptorPlugin',
-	'MitmProxy',
-	'AsyncMitmProxy',
-	'InvalidInterceptorPluginException'
-]
-
-
-
 class CertificateAuthority(object):
 
 	def __init__(self, ca_file='ca.pem', cache_dir=gettempdir()):
@@ -204,7 +178,6 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
 		url_requested = self.path
 		refrer_requested = ''
-
 		if not self.is_connect:
 			try:
 				# Connect to destination
@@ -216,7 +189,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 		req = '%s %s %s\r\n' % (self.command, self.path, self.request_version)
 
 		# Add headers to the request
-		
+
 		if 'webpage' in self.headers:
 			webpage =  self.headers['webpage']
 
@@ -340,10 +313,7 @@ class DebugInterceptor(RequestInterceptorPlugin, ResponseInterceptorPlugin):
 
 if __name__ == '__main__':
 	proxy = None
-
-	# starting the controller
 	controller.startController()
-	#print argv[1]
 	if not argv[1:]:
 		proxy = AsyncMitmProxy()
 	else:
@@ -352,5 +322,6 @@ if __name__ == '__main__':
 	try:
 		thread.start_new_thread(startPrefetching, (1,))
 		proxy.serve_forever()
+		
 	except KeyboardInterrupt:
 		proxy.server_close()

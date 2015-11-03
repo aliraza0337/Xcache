@@ -53,14 +53,14 @@ def openPage (webpage):
 	profile.set_preference('network.http.accept-encoding', '')
 
 	#for modifying header
-	profile.add_extension('modify_headers-0.7.1.1-fx.xpi')
-	profile.set_preference("modifyheaders.headers.count", 1)
-	profile.set_preference("modifyheaders.headers.action0", "Add")
-	profile.set_preference("modifyheaders.headers.name0", 'webpage')
-	profile.set_preference("modifyheaders.headers.value0", webpage)
-	profile.set_preference("modifyheaders.headers.enabled0", True)
-	profile.set_preference("modifyheaders.config.active", True)
-	profile.set_preference("modifyheaders.config.alwaysOn", True)
+	profile.add_extension( 'modify_headers-0.7.1.1-fx.xpi')
+	profile.set_preference('modifyheaders.headers.count', 1)
+	profile.set_preference('modifyheaders.headers.action0', "Add")
+	profile.set_preference('modifyheaders.headers.name0', 'webpage')
+	profile.set_preference('modifyheaders.headers.value0', webpage)
+	profile.set_preference('modifyheaders.headers.enabled0', True)
+	profile.set_preference('modifyheaders.config.active', True)
+	profile.set_preference('modifyheaders.config.alwaysOn', True)
 
 
 
@@ -98,7 +98,7 @@ def bootstrap(a):
 				if BOOTSTRAPSITES [item][1] <= time.time():
 					display = Display(visible=0, size=(1920,1080))
 					display.start()
-					
+					print item
 					openPage(item)
 					
 					BOOTSTRAPSITES [item][0]-=1
@@ -126,7 +126,8 @@ def sitesPrefetching (number):
 
 		global PREFETCHING_QUEUE , TIME, PREFETCHING_LIST
 		currentTime = time.time()
-		calculateUtilities()
+		if len(PREFETCHING_LIST) > 0:
+			calculateUtilities()
 		
 		while not PREFETCHING_QUEUE.empty():
 			PREFETCHING_BOOL = True 
@@ -152,7 +153,7 @@ def sitesPrefetching (number):
 def receiveLogs(num):
 	global ALL_WEBSITES
 
-	tmp = [('http://www.cnn.com/', 10)]
+	tmp = [('http://www.cnn.com/', 10),('http://www.bbc.com/', 10) ]
 
 	for siteInfo in tmp:
 		if siteInfo[0] in ALL_WEBSITES:

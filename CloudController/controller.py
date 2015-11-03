@@ -83,8 +83,6 @@ class HTTPObject:
 		return res
 	
 	def isX1 (self):
-
-
 		return True # if the change time > T
 		return False # if the change time < T
 	
