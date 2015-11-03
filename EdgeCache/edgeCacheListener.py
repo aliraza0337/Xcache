@@ -48,7 +48,7 @@ def listenFromController(num):
 
 
 def push_in_cache(edgeObject, mode):
-	#print 'ready to push    ' + edgeObject.url
+	print 'ready to push    ' + edgeObject.url
 	res = '%s %s %s\r\n' % (edgeObject.request_ver, edgeObject.status, edgeObject.reason)
 	for header in edgeObject.headers:
 		res += header[0] + ": " + header[1] +"\n"
@@ -59,7 +59,7 @@ def push_in_cache(edgeObject, mode):
 	f.close()
 
 	path = 'cache/Object'+mode+'.txt'
-	command = 'sudo ./tspush -f cache/Object.txt -u http://127.0.0.1:60001 -s '+edgeObject.url
+	command = 'sudo ./tspush -f cache/Object'+mode+'.txt -u http://127.0.0.1:8080 -s '+edgeObject.url
 	os.system(command)
 	os.system('rm cache/*')
 
