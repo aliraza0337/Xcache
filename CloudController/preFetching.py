@@ -51,6 +51,19 @@ def openPage (webpage):
 	profile.set_preference('network.http.use-cache', False)
 	profile.set_preference('network.dns.disablePrefetch', True)
 	profile.set_preference('network.http.accept-encoding', '')
+
+	#for modifying header
+	profile.add_extension('modify_headers-0.7.1.1-fx.xpi')
+	profile.set_preference("modifyheaders.headers.count", 1)
+	profile.set_preference("modifyheaders.headers.action0", "Add")
+	profile.set_preference("modifyheaders.headers.name0", 'webpage')
+	profile.set_preference("modifyheaders.headers.value0", webpage)
+	profile.set_preference("modifyheaders.headers.enabled0", True)
+	profile.set_preference("modifyheaders.config.active", True)
+	profile.set_preference("modifyheaders.config.alwaysOn", True)
+
+
+
 	profile.update_preferences()
 
 	browser = webdriver.Firefox(firefox_profile=profile, firefox_binary=binary, proxy=proxy)
@@ -117,10 +130,12 @@ def sitesPrefetching (number):
 		
 		while not PREFETCHING_QUEUE.empty():
 			PREFETCHING_BOOL = True 
+
 			w = PREFETCHING_QUEUE.get()
-			openPage(w)
 			display = Display(visible=0, size=(1920,1080))
 			display.start()
+
+			openPage(w[1])
 			currentTime = time.time()
 			display.stop()
 
@@ -156,19 +171,18 @@ def calculateUtilities():
 	PREFETCHING_QUEUE =  Q.PriorityQueue()
 	for webpage in PREFETCHING_LIST:
 		print 'calculateUtilities'
-		n_t = float(0.00)
-		d_t = float(0.00)
-		n_b = float(0.00)
-		d_b = float(0.00)
-		for o in ALL_WEBSITES[webpage].objects:
-			x1, x2, x3, x4 = ALL_WEBSITES[webpage].objects[o].calculateUtilities()
-			print (x1, x2 ,x3, x4)
+		n_t = float(0.000)
+		d_t = float(0.000)
+		n_b = float(0.000)
+		d_b = float(0.000)
+		webPageObjects = ALL_WEBSITES[webpage].objects
+		for o in webPageObjects.keys():
+			x1, x2, x3, x4 = webPageObjects[o].calculateUtilities()
 			n_t = n_t + x1 
 			d_t = d_t + x2 
 			n_b = n_b + x3  
 			d_b = d_b + x4
 		t = float(float(n_t/d_t) + float(n_b/d_b))
-		print 'PriorityQueue'
 		PREFETCHING_QUEUE.put((t, webpage))
 
 

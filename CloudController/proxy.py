@@ -216,9 +216,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
 		req = '%s %s %s\r\n' % (self.command, self.path, self.request_version)
 
 		# Add headers to the request
-
-		if 'Referer' in self.headers:
-			refrer_requested =  self.headers['Referer']
+		
+		if 'webpage' in self.headers:
+			webpage =  self.headers['webpage']
 
 
 		req += '%s\r\n' % self.headers
@@ -243,7 +243,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 			res += '%s\r\n' % h.msg
 			content_received = h.read()
 			res += content_received
-			HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, refrer_requested, time_b) # TODO replace the 100 with RTT
+			HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, webpage, time_b) # TODO replace the 100 with RTT
 			controller.createObject(HTTPObject_received)
 
 			self.request.sendall(self.mitm_response(res))

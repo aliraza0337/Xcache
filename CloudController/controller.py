@@ -42,21 +42,19 @@ class WebPage:
 
 
 class HTTPObject:
-	def __init__(self, headers, url, content, status, reason, request_ver, refrer, RTT ):
+	def __init__(self, headers, url, content, status, reason, request_ver, webpage, RTT ):
 		self.request_ver = request_ver
 		self.headers = headers
 		self.url = url
 		self.content = content
 		self.status = status
 		self.reason = reason
-		self.refrer = refrer
-		self.location = ''
-		self.webpage = ''
+		self.webpage = webpage
 		self.canApplyDiff = False
 		self.maxAge = 0
 		self.hash = hashlib.sha224(self.content).hexdigest()
 		self.getHeaderValues()
-		
+		print webpage
 		
 		# web object attributes for Utility calculation
 		self.timeToChange = []
@@ -64,9 +62,6 @@ class HTTPObject:
 		self.lastChangeTime = time.time()
 		self.RTT = RTT
 		self.size = len(content)
-
-		self.getWebPage() # to keep track of the object & related website
-
 
 
 	def getHeaderValues(self):
@@ -79,35 +74,6 @@ class HTTPObject:
 			#get weather objects is text or not to apply diff 
 			if (h[0] == 'content-type' and 'text' in h[1]) or (h[0] == 'Content-Type' and 'text' in h[1]): 
 				self.canApplyDiff = True
-
-			if h[0] == 'location' or h[0] == 'Location': #for redirections 
-				self.location=  h[1]
-
-	def getWebPage(self):
-		global REQUEST_REFRER
-		
-		if self.status == 302:
-			string = self.location
-			REQUEST_REFRER[string] = self.url
-			REQUEST_REFRER[self.url] = ''
-		
-		if not (self.url in REQUEST_REFRER):
-			REQUEST_REFRER[self.url] = self.refrer
-		
-		if self.refrer == '':
-			thisURL = self.url
-		else:
-			thisURL = self.refrer
-		
-		while 1:
-			if thisURL in REQUEST_REFRER:
-				previous = thisURL
-				thisURL = REQUEST_REFRER[thisURL]
-				if thisURL == '':
-					self.webpage = previous
-					return
-			else:
-				break
 			
 	def prepareObject(self):
 		res = '%s %s %s\r\n' % (self.request_ver, self.status, self.reason)
@@ -153,7 +119,7 @@ class HTTPObject:
 		if counter == 0:
 			return 0.0001
 		else:
-			return float (counter/len(newArray))
+			return float (counter/len(self.timeToChange))
 
 	def calculateUtilities(self):
 		global ALL_WEBSITES, BW
@@ -168,12 +134,14 @@ class HTTPObject:
 		delta = 1
 		n_t = N_req * q * (self.RTT + p*(self.size/BW))
 		n_b = N_req * q * p * self.size
+		print ('Time Numirator: ', N_req, q , self.RTT, p , self.size, BW)
+		print ('bandwidth Numirator: ', N_req, q , p , self.size)
 
 		if self.isX1():
 			timeBased = (p*delta*self.size)/BW
-			print ('here', timeBased, p, delta, self.size, BW) 
+			print ('timeBasedVariables: ', timeBased, p, delta, self.size, BW) 
 			bandwidthBased = (p*delta*self.size)
-			print bandwidthBased
+			print ('bandwidthBased: ', p, delta, self.size)
 		else:
 			timeBased = n_t
 			bandwidthBased = n_b
