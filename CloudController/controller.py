@@ -23,7 +23,7 @@ BW = 100
 
 def startController():
 	thread.start_new_thread( process_FromInternet, (1,))
-	#thread.start_new_thread( sendToEdgeCache, (1,))
+	thread.start_new_thread( sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	FROM_INTERNET.append(objectReceived)
@@ -235,7 +235,7 @@ def calculateDiff(new , old):
 
 def sendToEdgeCache(number):
 	global PUSH_TO_EDGE_CACHE
-	EdgeCache_IP = '127.0.0.1' # '195.229.110.139'
+	EdgeCache_IP = '10.225.2.214' # '195.229.110.139'
 	EdgeCache_PORT = 60002
 	while True:
 		if len(PUSH_TO_EDGE_CACHE) > 0:
