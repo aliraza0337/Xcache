@@ -12,6 +12,7 @@ import diff_match_patch
 import datetime
 import sys
 import edgeCacheObject
+import constants
 from preFetching import ALL_WEBSITES
 
 global FROM_INTERNET, PUSH_TO_EDGE_CACHE, REQUEST_REFRER, WEB_PAGE_CHANGE_TRACK
