@@ -6,6 +6,7 @@ import time
 import diff_match_patch
 import reportLogs 
 import edgeCacheObject 
+import constants 
 global ALL_OBJECTS , PUSH_TO_CACHE, PREVIOUS_OBJECTS 
 
 ALL_OBJECTS = [] 
@@ -24,8 +25,8 @@ def startfunc():
 
 def listenFromController(num):
 
-	EdgeCache_IP = "10.225.2.214"
-	EdgeCache_Port = 60002
+	EdgeCache_IP = constants.EDGECACHE_IP
+	EdgeCache_Port = constants.EDGECACHE_PORT_OBJECTS
 
 	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
 	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
