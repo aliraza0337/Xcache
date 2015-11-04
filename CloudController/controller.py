@@ -147,6 +147,8 @@ class HTTPObject:
 		return n_t, timeBased, n_b, bandwidthBased
 
 
+
+
 def process_FromInternet(number):
 	global FROM_INTERNET, ALL_WEBSITES
 
@@ -235,8 +237,9 @@ def calculateDiff(new , old):
 
 def sendToEdgeCache(number):
 	global PUSH_TO_EDGE_CACHE
-	EdgeCache_IP = '10.225.2.214' # '195.229.110.139'
-	EdgeCache_PORT = 60002
+	EdgeCache_IP = constants.EDGECACHE_IP # '195.229.110.139'
+	EdgeCache_PORT = constants.EDGECACHE_PORT_OBJECTS
+	
 	while True:
 		if len(PUSH_TO_EDGE_CACHE) > 0:
 			print 'sending ... '

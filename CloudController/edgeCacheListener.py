@@ -5,10 +5,9 @@ import socket as dummysocket
 import time 
 import diff_match_patch
 import reportLogs 
-import edgeCacheObject
-import constants 
-
+import edgeCacheObject 
 global ALL_OBJECTS , PUSH_TO_CACHE, PREVIOUS_OBJECTS 
+
 ALL_OBJECTS = [] 
 PUSH_TO_CACHE = []
 PREVIOUS_OBJECTS = {}
@@ -25,8 +24,8 @@ def startfunc():
 
 def listenFromController(num):
 
-	EdgeCache_IP = constants.EDGECACHE_IP
-	EdgeCache_Port = constants.EDGECACHE_PORT_OBJECTS
+	EdgeCache_IP = "10.225.2.214"
+	EdgeCache_Port = 60002
 
 	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
 	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
@@ -61,7 +60,7 @@ def push_in_cache(edgeObject, mode):
 	f.close()
 
 	path = 'cache/Object'+mode+'.txt'
-	command = './tspush -f cache/Object'+mode+'.txt -u http://'+constants.APS_IP_PORT+' -s '+edgeObject.url
+	command = './tspush -f cache/Object'+mode+'.txt -u http://127.0.0.1:8080 -s '+edgeObject.url
 	os.system(command)
 	os.system('rm cache/*')
 
