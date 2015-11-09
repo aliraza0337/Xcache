@@ -24,7 +24,7 @@ BW = 100
 
 def startController():
 	thread.start_new_thread( process_FromInternet, (1,))
-	#thread.start_new_thread( sendToEdgeCache, (1,))
+	thread.start_new_thread( sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	FROM_INTERNET.append(objectReceived)
