@@ -3,7 +3,8 @@ import sys
 import glob 
 import time
 import socket
-import cPickle 
+import cPickle
+import constants  
 	#grep_exp = 'GET http://[a-zA-Z.-]+/[[:blank:]] '
 	#os.system('grep -oE '+ grep_exp+path_to_log+'> logs/check.txt'
 
@@ -17,15 +18,16 @@ def getLogs(previous):
 	
 	finalList = []
 	information = {}
+	popularity = {}
 	threshHold = 15
-	destinationFolder = 'logs/'
-	logsDir = '/opt/ats/var/log/trafficserver/squid.log_ham*'
-	allFiles = glob.glob(logsDir)
-	sorted_allFiles =  sorted(allFiles)
-	one = sorted_allFiles[-1]
-	print one 
+	#destinationFolder = 'logs/'
+	#logsDir = constants.LOG_DIR
+	#allFiles = glob.glob(logsDir)
+	#sorted_allFiles =  sorted(allFiles)
+	#one = sorted_allFiles[-1]
+	one = 'squid.log'
 	if one == previous:
-		return [],""
+		return [],one
 	path_to_log = one
 	FILE = open(path_to_log)
 	lines = FILE.readlines()
@@ -37,6 +39,11 @@ def getLogs(previous):
 		user = tokens[2]
 		url = tokens[6]
 		
+		if url in popularity:
+			popularity[url] += 1
+		else: 
+			popularity[url] = 1 
+
 		if user in information:
 			information[user].append([time, url])
 		
@@ -51,21 +58,22 @@ def getLogs(previous):
 			number = float(eachURL[0]) - float(prev)
 			if number > threshHold or number == 0:
 				lastToken = eachURL[1].split('.')[-1]
-				flag = ('jpg' in lastToken) or ('js' in lastToken) or ('png' in lastToken) or ('?' in eachURL[1]) or (';' in eachURL[1])
-				print flag
+				flag =  ('jpg' in lastToken) or ('js' in lastToken) or ('png' in lastToken) or ('?' in eachURL[1]) or (';' in eachURL[1]) or ('svg' in lastToken) or ('css' in lastToken) or ('gif' in lastToken) or ('woff' in lastToken)
+
+
 				if not flag:
-					finalList.append(eachURL[1])
+					print eachURL[1]
+					finalList.append([eachURL[1], popularity[eachURL[1]]])
 			prev = eachURL[0]
 
-
-	return list(set(finalList)) , one 
+	print finalList
+	#list(set(finalList))
+	return finalList , one 
 
 def sendToController(websites):
-	print 'sending Logs'
 	print websites
-	CONTROLLER_IP = '10.225.3.124'
-	CONTROLLER_PORT = 7007
-	
+	CONTROLLER_IP = constants.CONTROLLER_IP
+	CONTROLLER_PORT = constants.CONTROLLER_PORT_LOGS
 	MESSAGE = cPickle.dumps(websites)
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.connect((CONTROLLER_IP, CONTROLLER_PORT))
@@ -77,12 +85,11 @@ def sendToController(websites):
 
 
 def startFunc(num):
-	print 'sending LOGS asassa'
+	print 'Sending Logs!'
 	previous = " "
 	while 1:
 		time.sleep(6)
-		print 'passed'
 		websites, previous = getLogs(previous)
-		if len(websites) > 0:
-			sendToController(websites)
-#startFunc(1)
+		#if len(websites) > 0:
+		#	sendToController(websites)
+startFunc(1)

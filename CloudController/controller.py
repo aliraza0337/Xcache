@@ -24,7 +24,7 @@ BW = 100
 
 def startController():
 	thread.start_new_thread( process_FromInternet, (1,))
-	thread.start_new_thread( sendToEdgeCache, (1,))
+	#thread.start_new_thread( sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	FROM_INTERNET.append(objectReceived)
@@ -55,7 +55,7 @@ class HTTPObject:
 		self.maxAge = 0
 		self.hash = hashlib.sha224(self.content).hexdigest()
 		self.getHeaderValues()
-		print webpage
+		#print webpage
 		
 		# web object attributes for Utility calculation
 		self.timeToChange = []
@@ -133,14 +133,14 @@ class HTTPObject:
 		delta = 1
 		n_t = N_req * q * (self.RTT + p*(self.size/BW))
 		n_b = N_req * q * p * self.size
-		print ('Time Numirator: ', N_req, q , self.RTT, p , self.size, BW)
-		print ('bandwidth Numirator: ', N_req, q , p , self.size)
+		#print ('Time Numirator: ', N_req, q , self.RTT, p , self.size, BW)
+		#print ('bandwidth Numirator: ', N_req, q , p , self.size)
 
 		if self.isX1():
 			timeBased = (p*delta*self.size)/BW
-			print ('timeBasedVariables: ', timeBased, p, delta, self.size, BW) 
+			#print ('timeBasedVariables: ', timeBased, p, delta, self.size, BW) 
 			bandwidthBased = (p*delta*self.size)
-			print ('bandwidthBased: ', p, delta, self.size)
+			#print ('bandwidthBased: ', p, delta, self.size)
 		else:
 			timeBased = n_t
 			bandwidthBased = n_b
@@ -243,7 +243,7 @@ def sendToEdgeCache(number):
 	
 	while True:
 		if len(PUSH_TO_EDGE_CACHE) > 0:
-			print 'sending ... '
+			print 'Sending Object  '
 			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
 			MESSAGE = cPickle.dumps(edgeObject)
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

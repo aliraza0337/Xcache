@@ -10,14 +10,15 @@ import socket as dummysocket
 import cPickle
 import Queue as Q
 import controller
+import constants 
 global ALL_WEBSITES, PREFETCHING_QUEUE, PREFETCHING_LIST 
 PREFETCHING_LIST = []
 PREFETCHING_QUEUE = Q.PriorityQueue()
 
-MAX_BOOTSTRAP  = 1
+MAX_BOOTSTRAP  = constants.MAX_BOOTSTRAP
 BOOTSTRAPSITES  = {}
 ALL_WEBSITES = {}
-TIME = 1800 #Time Interval 
+TIME =  constants.INTERVAL_PREFETCHING
 
 
 def startPrefetching(num):
@@ -61,17 +62,17 @@ def openPage (webpage):
 	profile.set_preference('modifyheaders.headers.enabled0', True)
 	profile.set_preference('modifyheaders.config.active', True)
 	profile.set_preference('modifyheaders.config.alwaysOn', True)
-
-
+	#
 
 	profile.update_preferences()
 
 	browser = webdriver.Firefox(firefox_profile=profile, firefox_binary=binary, proxy=proxy)
 	browser.implicitly_wait(50)
 	browser.set_page_load_timeout(100)
-
 	browser.set_window_size(1920, 1080)
+	
 	browser.get (webpage)
+
 	while browser.title == "Problem loading page":
 		browser.get (webpage)
 		time.sleep(0.001)
@@ -98,12 +99,12 @@ def bootstrap(a):
 				if BOOTSTRAPSITES [item][1] <= time.time():
 					display = Display(visible=0, size=(1920,1080))
 					display.start()
-					print item
+					print ('Requesting: ', item, 'for: ',BOOTSTRAPSITES[item][0] )
 					openPage(item)
 					
 					BOOTSTRAPSITES [item][0]-=1
-					BOOTSTRAPSITES [item][1]=time.time()+20
-
+					BOOTSTRAPSITES [item][1]=time.time()+constants.INTERVAL_BOOTSTRAP
+					print BOOTSTRAPSITES [item][1]
 					if BOOTSTRAPSITES [item][0] <=0 :
 						print 'Added to PREFETCHING_LIST'
 						PREFETCHING_LIST.append(item)
@@ -153,7 +154,7 @@ def sitesPrefetching (number):
 def receiveLogs(num):
 	global ALL_WEBSITES
 
-	tmp = [('http://www.cnn.com/', 10),('http://www.bbc.com/', 10) ]
+	tmp = [('http://www.cnn.com/', 10),('http://www.bbc.com/', 10), ('http://www.apple.com/', 10)]
 
 	for siteInfo in tmp:
 		if siteInfo[0] in ALL_WEBSITES:
