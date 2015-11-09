@@ -27,7 +27,7 @@ def listenFromController(num):
 
 	EdgeCache_IP = constants.EDGECACHE_IP
 	EdgeCache_Port = constants.EDGECACHE_PORT_OBJECTS
-	print EdgeCache_Port
+
 	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
 	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
 	s.bind((EdgeCache_IP, EdgeCache_Port))
@@ -61,7 +61,7 @@ def push_in_cache(edgeObject, mode):
 	f.close()
 
 	path = 'cache/Object'+mode+'.txt'
-	command = 'sudo ./tspush -f cache/Object'+mode+'.txt -u http://'+constants.APS_IP_PORT+' -s '+edgeObject.url
+	command = './tspush -f cache/Object'+mode+'.txt -u http://'+constants.APS_IP_PORT+' -s '+edgeObject.url
 	os.system(command)
 	os.system('rm cache/*')
 
