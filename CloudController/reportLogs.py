@@ -92,4 +92,3 @@ def startFunc(num):
 		websites, previous = getLogs(previous)
 		#if len(websites) > 0:
 		#	sendToController(websites)
-startFunc(1)
