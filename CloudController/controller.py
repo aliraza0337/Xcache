@@ -11,20 +11,21 @@ import os
 import diff_match_patch
 import datetime
 import sys
+import logging
 import edgeCacheObject
 import constants
 from preFetching import ALL_WEBSITES
-
 global FROM_INTERNET, PUSH_TO_EDGE_CACHE, REQUEST_REFRER, WEB_PAGE_CHANGE_TRACK
+logging.basicConfig(filename='controllerBW.log',level=logging.INFO)
 REQUEST_REFRER = {}
 WEB_PAGE_CHANGE_TRACK = {}
 FROM_INTERNET = []
 PUSH_TO_EDGE_CACHE = []
-BW = 100
+BW = constants.BW
 
 def startController():
 	thread.start_new_thread( process_FromInternet, (1,))
-	thread.start_new_thread( sendToEdgeCache, (1,))
+	#thread.start_new_thread( sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	FROM_INTERNET.append(objectReceived)
@@ -55,14 +56,13 @@ class HTTPObject:
 		self.maxAge = 0
 		self.hash = hashlib.sha224(self.content).hexdigest()
 		self.getHeaderValues()
-		#print webpage
 		
 		# web object attributes for Utility calculation
 		self.timeToChange = []
 		self.expirationTime = time.time() + float(self.maxAge)
 		self.lastChangeTime = time.time()
 		self.RTT = RTT
-		self.size = len(content)
+		self.size = len(content)*8
 
 
 	def getHeaderValues(self):
@@ -224,6 +224,9 @@ def calculateDiff(new , old):
 	patch_list = var.patch_make(old_content, new_content, diff)
 	patch_text = var.patch_toText(patch_list)  # calculate diff
 	#make EdgeCacheObject with content being diff and diff variable as True
+	log_string = 'OBJECT_DIFF: '+str(len(old_content)) +' :'+ str(len(patch_text))
+	logging.info(log_string)
+
 	newO = edgeCacheObject.EdgeObject(	new.headers,  
 										new.url, 
 										patch_text, 
@@ -245,6 +248,11 @@ def sendToEdgeCache(number):
 		if len(PUSH_TO_EDGE_CACHE) > 0:
 			print 'Sending Object  '
 			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
+
+			if not edgeObject.diff:
+				log_string = 'OBJECT: '+str(len(edgeObject.content))
+				logging.info(log_string)
+
 			MESSAGE = cPickle.dumps(edgeObject)
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect((EdgeCache_IP, EdgeCache_PORT))

@@ -7,5 +7,6 @@ INTERVAL_PREFETCHING = 1800 # in sconds #half an hour
 CONTROLLER_IP = '10.224.41.201'
 CONTROLLER_PORT_LOGS = 7007
 LOG_DIR = '/opt/ats/var/log/trafficserver/squid.log_ham*'
+BW = 930*10e6 #930 Mbits
 #CONTROLLER_IP = 
 #CONTROLLER_PORT_LOGS =

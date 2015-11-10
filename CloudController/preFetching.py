@@ -1,7 +1,6 @@
 import time
 import thread
 import copy
-
 from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.common.proxy import *
@@ -9,9 +8,11 @@ import selenium.webdriver.firefox.webdriver as fwb
 import socket as dummysocket
 import cPickle
 import Queue as Q
+import logging
 import controller
 import constants 
 global ALL_WEBSITES, PREFETCHING_QUEUE, PREFETCHING_LIST 
+logging.basicConfig(filename='prefetching.log',level=logging.INFO)
 PREFETCHING_LIST = []
 PREFETCHING_QUEUE = Q.PriorityQueue()
 
@@ -99,16 +100,24 @@ def bootstrap(a):
 				if BOOTSTRAPSITES [item][1] <= time.time():
 					display = Display(visible=0, size=(1920,1080))
 					display.start()
+
 					print ('Requesting: ', item, 'for: ',BOOTSTRAPSITES[item][0] )
+					
+					log_string = 'BOOTSTRAP: '+str(time.time()) +' :'+item 
+					logging.info(log_string)
+					
 					openPage(item)
 					
 					BOOTSTRAPSITES [item][0]-=1
 					BOOTSTRAPSITES [item][1]=time.time()+constants.INTERVAL_BOOTSTRAP
 					print BOOTSTRAPSITES [item][1]
 					if BOOTSTRAPSITES [item][0] <=0 :
-						print 'Added to PREFETCHING_LIST'
-						PREFETCHING_LIST.append(item)
 
+						print 'Added to PREFETCHING_LIST'
+						log_string = 'BOOTSTRAP: ADDED_TO_PREFETCHING_LIST: '+item 
+						logging.info(log_string)
+						
+						PREFETCHING_LIST.append(item)
 					display.stop()
 		time.sleep(1)
 
@@ -136,6 +145,9 @@ def sitesPrefetching (number):
 			w = PREFETCHING_QUEUE.get()
 			display = Display(visible=0, size=(1920,1080))
 			display.start()
+			
+			log_string = 'PREFETCHING: '+str(time.time()) +' :'+item 
+			logging.info(log_string)
 
 			openPage(w[1])
 			currentTime = time.time()

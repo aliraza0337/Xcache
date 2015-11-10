@@ -178,6 +178,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
 		url_requested = self.path
 		refrer_requested = ''
+		#print url_requested
 		if not self.is_connect:
 			try:
 				# Connect to destination
