@@ -63,7 +63,7 @@ def push_in_cache(edgeObject, mode):
 	path = 'cache/Object'+mode+'.txt'
 	command = 'sudo ./tspush -f cache/Object'+mode+'.txt -u http://'+constants.APS_IP_PORT+' -s '+edgeObject.url
 	os.system(command)
-	os.system('rm cache/*')
+	os.system('rm cache/Object'+mode+'.txt')
 
 
 def applyDiff(obj):
@@ -104,9 +104,9 @@ def processObjects(num):
 			if not edgeObject.diff:			
 				push_in_cache(edgeObject, 'normal')
 				PREVIOUS_OBJECTS[edgeObject.url] = edgeObject
-				time.sleep(0.001)
 			else:
 				applyDiff(edgeObject)
+			time.sleep(0.001)
 		time.sleep(0.001)
 
 
