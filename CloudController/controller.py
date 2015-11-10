@@ -16,7 +16,6 @@ import edgeCacheObject
 import constants
 from preFetching import ALL_WEBSITES
 global FROM_INTERNET, PUSH_TO_EDGE_CACHE, REQUEST_REFRER, WEB_PAGE_CHANGE_TRACK
-logging.basicConfig(filename='controllerBW.log',level=logging.INFO)
 REQUEST_REFRER = {}
 WEB_PAGE_CHANGE_TRACK = {}
 FROM_INTERNET = []
@@ -24,8 +23,9 @@ PUSH_TO_EDGE_CACHE = []
 BW = constants.BW
 
 def startController():
+	logging.basicConfig(filename='controllerBW.log',level=logging.INFO)
 	thread.start_new_thread( process_FromInternet, (1,))
-	#thread.start_new_thread( sendToEdgeCache, (1,))
+	thread.start_new_thread( sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	FROM_INTERNET.append(objectReceived)

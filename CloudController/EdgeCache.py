@@ -66,7 +66,6 @@ def push_in_cache(edgeObject, mode):
 	os.system('rm cache/*')
 
 
-
 def applyDiff(obj):
 
 	global PREVIOUS_OBJECTS
@@ -105,7 +104,7 @@ def processObjects(num):
 			if not edgeObject.diff:			
 				push_in_cache(edgeObject, 'normal')
 				PREVIOUS_OBJECTS[edgeObject.url] = edgeObject
-			
+				time.sleep(0.001)
 			else:
 				applyDiff(edgeObject)
 		time.sleep(0.001)

@@ -146,7 +146,7 @@ def sitesPrefetching (number):
 			display = Display(visible=0, size=(1920,1080))
 			display.start()
 			
-			log_string = 'PREFETCHING: '+str(time.time()) +' :'+item 
+			log_string = 'PREFETCHING: '+str(time.time()) +' :'+w[1] 
 			logging.info(log_string)
 
 			openPage(w[1])
