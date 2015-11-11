@@ -3,6 +3,8 @@ import cPickle
 from threading import Thread 
 import socket as dummysocket
 import time 
+import random 
+import string as stringRandom 
 import diff_match_patch
 import reportLogs 
 import edgeCacheObject 
@@ -52,18 +54,21 @@ def push_in_cache(edgeObject, mode):
 	print 'ready to push    ' + edgeObject.url
 	res = '%s %s %s\r\n' % (edgeObject.request_ver, edgeObject.status, edgeObject.reason)
 	
+	N = 12 
+	file_name = ''.join(random.choice(stringRandom.ascii_uppercase + stringRandom.digits) for _ in range(N))
+	
 	for header in edgeObject.headers:
 		res += header[0] + ": " + header[1] +"\n"
 
 	res = res+"\r\n"+edgeObject.content
-	with open('cache/Object'+mode+'.txt','wb') as f:
+	with open('cache/'+file_name+'.txt','wb') as f:
 		f.write(res);
 	f.close()
 
-	path = 'cache/Object'+mode+'.txt'
-	command = 'sudo ./tspush -f cache/Object'+mode+'.txt -u http://'+constants.APS_IP_PORT+' -s '+edgeObject.url
+	#path = 'cache/'+file_name+'.txt'
+	command = 'sudo ./tspush -f cache/'+file_name+'.txt -u http://'+constants.APS_IP_PORT+' -s '+edgeObject.url
 	os.system(command)
-	os.system('rm cache/Object'+mode+'.txt')
+	os.system('rm cache/'+file_name+'.txt')
 
 
 def applyDiff(obj):
