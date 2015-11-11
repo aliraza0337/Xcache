@@ -1,0 +1,12 @@
+HTTP/1.1 200 OK
+content-length: 267
+expires: Wed, 11 Nov 2015 07:43:41 GMT
+server: Apache
+last-modified: Sun, 11 Jan 2015 16:52:10 GMT
+connection: keep-alive
+cache-control: max-age=3547
+date: Wed, 11 Nov 2015 06:44:34 GMT
+content-type: application/x-javascript
+
+/* Deployed On: 2015-01-11 11:52:10 */
+AMPTManager.renderSingleSlot("ad_mod_85a882a72", [[200,60],[175,31]], [["transId", cnnad_transactionID],["kuid", Krux.user],["ksg", Krux.segments],["guid", AMPTManager.readCookie("ug")], ["pos",["mod"]]], [], "8663477/CNNi", 0);

@@ -1,0 +1,18 @@
+HTTP/1.1 200 OK
+set-cookie: aspen_uuid_cnntos=961c040a5d9bdb601558baac3f2198ac7c44cee7|no|1|1|100|06e63420e7; Domain=aspen.turner.com; expires=Tue, 01-Nov-2016 06:44:46 GMT; Max-Age=30758400; Path=/
+server: Apache
+connection: close
+date: Wed, 11 Nov 2015 06:44:46 GMT
+access-control-allow-origin: *
+access-control-allow-methods: GET,POST,OPTIONS
+content-type: application/json
+
+{ 
+    "throttled" : "no" ,
+    "servername" : "aspen.turner.com",
+    "sessionId" : "747847d7382fe279978b38f335022c19fb4668e8~cnntos~Javascript~cnn~100",
+    "shortId" : "EQEPIW",
+    "aspenUUID" : "961c040a5d9bdb601558baac3f2198ac7c44cee7",
+    
+    "timestamp" : 1447224286137
+}

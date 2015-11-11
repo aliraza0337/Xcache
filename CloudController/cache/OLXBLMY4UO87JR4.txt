@@ -1,0 +1,18 @@
+HTTP/1.1 200 OK
+content-length: 0
+via: 1.1 varnish, 1.1 varnish
+x-servedbyhost: prd-10-60-168-119.nodes.56m.dmtio.net
+x-cache: HIT, HIT
+fastly-debug-digest: 0f2375f7d2025b39dc7504ad2eb804d11116c3b34e1c628cb275a3e3bc85df9c
+accept-ranges: bytes
+x-timer: S1447224255.427938,VS0,VE0
+vary: Accept-Encoding
+set-cookie: countryCode=AE
+connection: keep-alive
+x-served-by: cache-iad2137-IAD, cache-sin6920-SIN
+x-cache-hits: 1, 2
+cache-control: max-age=60
+date: Wed, 11 Nov 2015 06:44:15 GMT
+content-type: text/html; charset=utf-8
+age: 102
+

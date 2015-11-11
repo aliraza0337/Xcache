@@ -1,0 +1,20 @@
+HTTP/1.1 302 Found
+content-length: 0
+xserver: www497
+set-cookie: s_vi=[CS]v1|2B2171E8851D5B40-60001905C0003055[CE]; Expires=Fri, 10 Nov 2017 06:44:35 GMT; Domain=cnn.com; Path=/
+expires: Tue, 10 Nov 2015 06:44:35 GMT
+vary: *
+keep-alive: timeout=15
+x-c: ms-4.9.9
+last-modified: Thu, 12 Nov 2015 06:44:35 GMT
+connection: Keep-Alive
+etag: "5642E3D3-0345-57BD561D"
+location: http://b.scorecardresearch.com/r?c2=6035748&d.c=gif&d.o=cnn-adbp-intl&d.x=261484572&d.t=page&d.u=http%3A%2F%2Fedition.cnn.com%2F
+pragma: no-cache
+cache-control: no-cache, no-store, max-age=0, no-transform, private
+date: Wed, 11 Nov 2015 06:44:35 GMT
+access-control-allow-origin: *
+server: Omniture DC/2.0.0
+content-type: text/plain
+p3p: policyref="/w3c/p3p.xml", CP="NOI DSP COR NID PSA OUR IND COM NAV STA"
+

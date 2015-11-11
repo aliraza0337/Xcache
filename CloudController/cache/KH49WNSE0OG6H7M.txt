@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+content-length: 0
+x-cache: HIT
+accept-ranges: bytes
+expires: Wed, 11 Nov 2015 06:44:08 GMT
+server: ECS (fcn/41AC)
+last-modified: Mon, 25 Jul 2011 12:46:22 GMT
+etag: "1685107488"
+cache-control: max-age=0
+date: Wed, 11 Nov 2015 06:44:08 GMT
+access-control-allow-origin: *
+content-type: text/css
+

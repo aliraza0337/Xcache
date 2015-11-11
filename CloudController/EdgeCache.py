@@ -51,12 +51,11 @@ def listenFromController(num):
 
 
 def push_in_cache(edgeObject, mode):
-	print 'ready to push    ' + edgeObject.url
 	res = '%s %s %s\r\n' % (edgeObject.request_ver, edgeObject.status, edgeObject.reason)
-	
-	N = 12 
+	N = 15 
 	file_name = ''.join(random.choice(stringRandom.ascii_uppercase + stringRandom.digits) for _ in range(N))
-	
+	print 'ready to push    ' + edgeObject.url + ':'+ file_name
+
 	for header in edgeObject.headers:
 		res += header[0] + ": " + header[1] +"\n"
 
@@ -65,10 +64,11 @@ def push_in_cache(edgeObject, mode):
 		f.write(res);
 	f.close()
 
-	#path = 'cache/'+file_name+'.txt'
+	path = 'cache/'+file_name+'.txt'
 	command = 'sudo ./tspush -f cache/'+file_name+'.txt -u http://'+constants.APS_IP_PORT+' -s '+edgeObject.url
 	os.system(command)
-	os.system('rm cache/'+file_name+'.txt')
+	time.sleep(0.1)
+	os.system('rm '+path)
 
 
 def applyDiff(obj):
