@@ -174,6 +174,9 @@ def receiveLogs(num):
 		else:
 			BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
 			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
+			
+			log_string = 'ADDED FROM LOGS: '+siteInfo[0]
+			logging.info(log_string)
 
 	return
 
@@ -197,6 +200,9 @@ def calculateUtilities():
 			n_b = n_b + x3  
 			d_b = d_b + x4
 		t = float(float(n_t/d_t) + float(n_b/d_b))
+		
+		log_string = 'UTILITY: '+webpage +' '+str(t) 
+		logging.info(log_string)
 		PREFETCHING_QUEUE.put((t, webpage))
 
 

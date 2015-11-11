@@ -100,9 +100,7 @@ def applyDiff(obj):
 
 def processObjects(num):	
 	global ALL_OBJECTS, PUSH_TO_CACHE, PREVIOUS_OBJECTS
-
 	while 1:
-
 		if len(ALL_OBJECTS) > 0:
 			edgeObject = ALL_OBJECTS.pop(0)
 			
@@ -113,6 +111,5 @@ def processObjects(num):
 				applyDiff(edgeObject)
 			time.sleep(0.001)
 		time.sleep(0.001)
-
 
 startfunc()
