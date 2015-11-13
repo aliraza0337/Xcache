@@ -20,12 +20,11 @@ def getLogs(previous):
 	information = {}
 	popularity = {}
 	threshHold = 15
-	#destinationFolder = 'logs/'
-	#logsDir = constants.LOG_DIR
-	#allFiles = glob.glob(logsDir)
-	#sorted_allFiles =  sorted(allFiles)
-	#one = sorted_allFiles[-1]
-	one = 'squid.log'
+	destinationFolder = 'logs/'
+	logsDir = constants.LOG_DIR
+	allFiles = glob.glob(logsDir)
+	sorted_allFiles =  sorted(allFiles)
+	one = sorted_allFiles[-1]
 	if one == previous:
 		return [],one
 	path_to_log = one
@@ -90,5 +89,10 @@ def startFunc(num):
 	while 1:
 		time.sleep(6)
 		websites, previous = getLogs(previous)
+		print websites
 		#if len(websites) > 0:
 		#	sendToController(websites)
+
+
+
+startFunc(1)

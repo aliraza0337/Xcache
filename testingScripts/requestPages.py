@@ -63,7 +63,7 @@ def openPage (webpage):
 		time.sleep(0.001)
 
 	del profile
-	print "-- Finished loading ", browser.title
+	#print "-- Finished loading ", browser.title
 	browser.quit()
 	del browser
 
@@ -85,16 +85,16 @@ def StartPrefectching():
 	webpages = readtxtFile('websites.txt')
 	total_webpages =  len(webpages)
 	while 1:
-		break
 		display = Display(visible=0, size=(1920,1080))
 		display.start()
-		w = random.randint(0, total_webpages)
+		w = random.randint(0, total_webpages-1)
 		timeToSleep = random.randint(100, 150)
 		print webpages[w]
 		openPage(webpages[w])
 		display.stop()
 		time.sleep(timeToSleep)
 		log_string = 'REQUESTING: '+ str(time.time())+ ': '+webpages[w]
+		print log_string
 		logging.info(log_string)
 
 
