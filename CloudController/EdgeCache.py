@@ -21,8 +21,8 @@ def startfunc():
 	thread1.start()
 	thread2 = Thread(target = processObjects, args = (1, ))
 	thread2.start()
-	#thread3 = Thread(target = reportLogs.startFunc, args = (1, ))
-	#thread3.start()
+	thread3 = Thread(target = reportLogs.startFunc, args = (1, ))
+	thread3.start()
 
 
 def listenFromController(num):

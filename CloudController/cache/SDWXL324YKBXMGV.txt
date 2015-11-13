@@ -1,0 +1,13 @@
+HTTP/1.1 302 Found
+content-length: 0
+via: 1.1 varnish
+x-cache: HIT
+accept-ranges: bytes
+server: Varnish
+retry-after: 0
+connection: close
+x-served-by: cache-sin6921-SIN
+x-cache-hits: 0
+location: http://edition.cnn.com/
+date: Wed, 11 Nov 2015 20:14:10 GMT
+

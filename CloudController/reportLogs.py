@@ -57,20 +57,24 @@ def getLogs(previous):
 			number = float(eachURL[0]) - float(prev)
 			if number > threshHold or number == 0:
 				lastToken = eachURL[1].split('.')[-1]
-				flag =  ('jpg' in lastToken) or ('js' in lastToken) or ('png' in lastToken) or ('?' in eachURL[1]) or (';' in eachURL[1]) or ('svg' in lastToken) or ('css' in lastToken) or ('gif' in lastToken) or ('woff' in lastToken)
+				flag =  ('jpg' in lastToken) or ('js' in lastToken) or ('png' in lastToken) or ('?' in eachURL[1]) or (';' in eachURL[1]) or ('svg' in lastToken) or ('css' in lastToken) or ('gif' in lastToken) or ('woff' in lastToken) or ('ico' in lastToken)
 
 
 				if not flag:
-					print eachURL[1]
-					finalList.append([eachURL[1], popularity[eachURL[1]]])
+					t = eachURL[1].split(':')
+					if len( t ) > 2:
+						u = t[0]+':'+t[1]+'/'
+						finalList.append([u, popularity[eachURL[1]]])
+					else:
+						finalList.append([eachURL[1], popularity[eachURL[1]]])
 			prev = eachURL[0]
 
-	print finalList
+	#print finalList
 	#list(set(finalList))
 	return finalList , one 
 
 def sendToController(websites):
-	print websites
+	#print websites
 	CONTROLLER_IP = constants.CONTROLLER_IP
 	CONTROLLER_PORT = constants.CONTROLLER_PORT_LOGS
 	MESSAGE = cPickle.dumps(websites)
@@ -87,12 +91,11 @@ def startFunc(num):
 	print 'Sending Logs!'
 	previous = " "
 	while 1:
-		time.sleep(6)
+		time.sleep(100)
 		websites, previous = getLogs(previous)
 		print websites
-		#if len(websites) > 0:
-		#	sendToController(websites)
+		if len(websites) > 0:
+			sendToController(websites)
 
 
-
-startFunc(1)
+#startFunc(1)

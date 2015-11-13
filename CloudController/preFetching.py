@@ -68,7 +68,7 @@ def openPage (webpage):
 	profile.update_preferences()
 
 	browser = webdriver.Firefox(firefox_profile=profile, firefox_binary=binary, proxy=proxy)
-	browser.implicitly_wait(50)
+	browser.implicitly_wait(30)
 	browser.set_page_load_timeout(100)
 	browser.set_window_size(1920, 1080)
 	
@@ -105,9 +105,10 @@ def bootstrap(a):
 					
 					log_string = 'BOOTSTRAP: '+str(time.time()) +' :'+item 
 					logging.info(log_string)
-					
-					openPage(item)
-					
+					try:
+						openPage(item)
+					except:
+						pass
 					BOOTSTRAPSITES [item][0]-=1
 					BOOTSTRAPSITES [item][1]=time.time()+constants.INTERVAL_BOOTSTRAP
 					print BOOTSTRAPSITES [item][1]
@@ -148,8 +149,10 @@ def sitesPrefetching (number):
 			
 			log_string = 'PREFETCHING: '+str(time.time()) +' :'+w[1] 
 			logging.info(log_string)
-
-			openPage(w[1])
+			try:
+				openPage(w[1])
+			except:
+				pass
 			currentTime = time.time()
 			display.stop()
 
@@ -165,18 +168,33 @@ def sitesPrefetching (number):
 
 def receiveLogs(num):
 	global ALL_WEBSITES
+	CONTROLLER_IP = constants.CONTROLLER_IP
+	print CONTROLLER_IP 
+	CONTROLLER_PORT = constants.CONTROLLER_PORT_LOGS
+	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
+	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
+	s.bind((CONTROLLER_IP, CONTROLLER_PORT))
 
-	tmp = [('http://www.cnn.com/', 10),('http://www.bbc.com/', 10), ('http://www.apple.com/', 10)]
-
-	for siteInfo in tmp:
-		if siteInfo[0] in ALL_WEBSITES:
-			ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
-		else:
-			BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
-			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
+	while 1:
+		s.listen(1)
+		conn, addr = s.accept()
+		MESSAGE= ""
+		data = conn.recv(1024)
+		while data:
+			MESSAGE += data
+			data = conn.recv(1024)
+		websites = cPickle.loads(MESSAGE)	
+		tmp = websites
+		print tmp 
+		for siteInfo in tmp:
+			if siteInfo[0] in ALL_WEBSITES:
+				ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
+			else:
+				BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
+				ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
 			
-			log_string = 'ADDED FROM LOGS: '+siteInfo[0]
-			logging.info(log_string)
+				log_string = 'ADDED FROM LOGS: '+siteInfo[0]
+				logging.info(log_string)
 
 	return
 
@@ -207,28 +225,3 @@ def calculateUtilities():
 
 
 
-	# CONTROLLER_IP = '10.225.3.124'
-	# CONTROLLER_PORT = 7007
-
-	# s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
-	# s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
-
-	# s.bind((CONTROLLER_IP, CONTROLLER_PORT))
-
-	# while 1:
-
-	# 	s.listen(1)
-	# 	conn, addr = s.accept()
-	# 	MESSAGE= ""
-	# 	data = conn.recv(1024)
-
-	# 	while data:
-	# 		MESSAGE += data
-	# 		data = conn.recv(1024)
-
-	# 	websites = cPickle.loads(MESSAGE)
-
-	# 	for web in websites:
-	# 		if not (web in ALL_WEBSITES):
-	# 			ALL_WEBSITES[web] = ''
-	# 			PREFETCHING_QUEUE.put(( time.time() + 1800 ,web))
