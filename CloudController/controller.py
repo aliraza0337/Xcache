@@ -246,7 +246,7 @@ def sendToEdgeCache(number):
 	
 	while True:
 		if len(PUSH_TO_EDGE_CACHE) > 0:
-			print 'Sending Object  '
+			#print 'Sending Object  '
 			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
 
 			if not edgeObject.diff:

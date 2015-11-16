@@ -62,11 +62,17 @@ def getLogs(previous):
 
 				if not flag:
 					t = eachURL[1].split(':')
+					#print t
 					if len( t ) > 2:
 						u = t[0]+':'+t[1]+'/'
 						finalList.append([u, popularity[eachURL[1]]])
-					else:
+					elif len(t)==2 and 'http' in t[0]:
 						finalList.append([eachURL[1], popularity[eachURL[1]]])
+					elif len(t)==1:
+						finalList.append([t[0], popularity[eachURL[1]]])
+					else:
+						finalList.append(['http://www.'+t[0], popularity[eachURL[1]]])
+
 			prev = eachURL[0]
 
 	#print finalList
@@ -94,6 +100,7 @@ def startFunc(num):
 		time.sleep(100)
 		websites, previous = getLogs(previous)
 		print websites
+		#break
 		if len(websites) > 0:
 			sendToController(websites)
 

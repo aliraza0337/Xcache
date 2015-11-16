@@ -92,7 +92,7 @@ def bootstrap(a):
 	while True:
 		if len (BOOTSTRAPSITES ) > 0:
 
-			for item in BOOTSTRAPSITES :
+			for item in BOOTSTRAPSITES.keys() :
 				
 				if BOOTSTRAPSITES[item][0] <= 0:
 					continue
@@ -101,7 +101,7 @@ def bootstrap(a):
 					display = Display(visible=0, size=(1920,1080))
 					display.start()
 
-					print ('Requesting: ', item, 'for: ',BOOTSTRAPSITES[item][0] )
+					print ('Bootstraping: ', item, 'for: ',BOOTSTRAPSITES[item][0] )
 					
 					log_string = 'BOOTSTRAP: '+str(time.time()) +' :'+item 
 					logging.info(log_string)
@@ -113,11 +113,9 @@ def bootstrap(a):
 					BOOTSTRAPSITES [item][1]=time.time()+constants.INTERVAL_BOOTSTRAP
 					print BOOTSTRAPSITES [item][1]
 					if BOOTSTRAPSITES [item][0] <=0 :
-
 						print 'Added to PREFETCHING_LIST'
 						log_string = 'BOOTSTRAP: ADDED_TO_PREFETCHING_LIST: '+item 
-						logging.info(log_string)
-						
+						logging.info(log_string)						
 						PREFETCHING_LIST.append(item)
 					display.stop()
 		time.sleep(1)
@@ -138,8 +136,9 @@ def sitesPrefetching (number):
 		global PREFETCHING_QUEUE , TIME, PREFETCHING_LIST
 		currentTime = time.time()
 		if len(PREFETCHING_LIST) > 0:
-			calculateUtilities()
-		
+			print 'Calculate U'
+			PREFETCHING_QUEUE = calculateUtilities()
+			print PREFETCHING_QUEUE
 		while not PREFETCHING_QUEUE.empty():
 			PREFETCHING_BOOL = True 
 
@@ -148,6 +147,7 @@ def sitesPrefetching (number):
 			display.start()
 			
 			log_string = 'PREFETCHING: '+str(time.time()) +' :'+w[1] 
+			print log_string
 			logging.info(log_string)
 			try:
 				openPage(w[1])
@@ -159,6 +159,7 @@ def sitesPrefetching (number):
 		if PREFETCHING_BOOL:
 			time_elapsed =  time.time() - currentTime
 			if time_elapsed < TIME:
+				print 'going to sleep:' + str(TIME) +' '+str(time_elapsed)
 				time.sleep(TIME - time_elapsed)
 
 
@@ -217,11 +218,17 @@ def calculateUtilities():
 			d_t = d_t + x2 
 			n_b = n_b + x3  
 			d_b = d_b + x4
+		if d_t == 0:
+			d_t = 1 
+		if d_b == 0:
+			d_b = 1
+
 		t = float(float(n_t/d_t) + float(n_b/d_b))
 		
 		log_string = 'UTILITY: '+webpage +' '+str(t) 
 		logging.info(log_string)
 		PREFETCHING_QUEUE.put((t, webpage))
+	return PREFETCHING_QUEUE
 
 
 

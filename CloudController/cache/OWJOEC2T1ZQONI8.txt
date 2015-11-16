@@ -1,0 +1,24 @@
+HTTP/1.1 200 OK
+content-length: 138
+via: cache27.l2sg1[0,304-0,H], cache24.l2sg1[0,0], cache1.ae1[0,200-0,H], cache4.ae1[0,0]
+x-swift-cachetime: 3600
+x-cache: HIT TCP_MEM_HIT dirn:11:826818583
+age: 5247
+server: Tengine
+last-modified: Mon, 29 Jun 2015 05:50:59 GMT
+connection: keep-alive
+x-swift-savetime: Sun, 15 Nov 2015 08:53:06 GMT
+cache-control: max-age=315360000,s-maxage=3600
+date: Sun, 15 Nov 2015 08:12:41 GMT
+access-control-allow-origin: *
+content-type: text/css
+timing-allow-origin: *
+
+.channel-edu .thumbs {
+  margin-right: -5px;
+}
+.channel-edu .thumbs a {
+  margin-bottom: 15px;
+  margin-right: 5px;
+  *margin-right: 0;
+}
