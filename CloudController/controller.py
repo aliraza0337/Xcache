@@ -56,7 +56,7 @@ class HTTPObject:
 		self.maxAge = 0
 		self.hash = hashlib.sha224(self.content).hexdigest()
 		self.getHeaderValues()
-		
+
 		# web object attributes for Utility calculation
 		self.timeToChange = []
 		self.expirationTime = time.time() + float(self.maxAge)
@@ -67,26 +67,26 @@ class HTTPObject:
 
 	def getHeaderValues(self):
 		for h in self.headers:
-			if h[0] == 'cache-control' or h[0] == 'Cache-Control': #gets Max-age 
+			if h[0] == 'cache-control' or h[0] == 'Cache-Control': #gets Max-age
 				tok = h[1].split(',')
 				for t in tok:
 					if 'max-age' in t:
 						self.maxAge = t.split('=')[1]
-			#get weather objects is text or not to apply diff 
-			if (h[0] == 'content-type' and 'text' in h[1]) or (h[0] == 'Content-Type' and 'text' in h[1]): 
+			#get weather objects is text or not to apply diff
+			if (h[0] == 'content-type' and 'text' in h[1]) or (h[0] == 'Content-Type' and 'text' in h[1]):
 				self.canApplyDiff = True
-			
+
 	def prepareObject(self):
 		res = '%s %s %s\r\n' % (self.request_ver, self.status, self.reason)
 		for header in self.headers:
 			res += header[0] + ": " + header[1] +"\n"
 		res = res+"\r\n"+self.content
 		return res
-	
+
 	def isX1 (self):
 		return True # if the change time > T
 		return False # if the change time < T
-	
+
 	def addTimeStamp(self, t):
 		self.timeToChange.append( t - self.lastChangeTime)
 		self.lastChangeTime = t
@@ -104,13 +104,13 @@ class HTTPObject:
 		self.expirationTime = time.time() + float(self.maxAge)
 		self.lastChangeTime = time.time()
 		self.size = len(self.content)
-	
+
 	def calculateP(self):
 
 		currentTime = time.time()
 		time_elapsed = currentTime - self.lastChangeTime
-		counter = 0 
-		
+		counter = 0
+
 		for a in self.timeToChange:
 			if time_elapsed > a:
 				counter = counter + 1
@@ -125,9 +125,9 @@ class HTTPObject:
 
 		N_req = ALL_WEBSITES[self.webpage].N
 		bandwidth = BW
-		q = 0  
+		q = 0
 		if self.lastChangeTime < self.expirationTime:
-			q = 1 
+			q = 1
 		p = float(self.calculateP())
 		#
 		delta = 1
@@ -138,7 +138,7 @@ class HTTPObject:
 
 		if self.isX1():
 			timeBased = (p*delta*self.size)/BW
-			#print ('timeBasedVariables: ', timeBased, p, delta, self.size, BW) 
+			#print ('timeBasedVariables: ', timeBased, p, delta, self.size, BW)
 			bandwidthBased = (p*delta*self.size)
 			#print ('bandwidthBased: ', p, delta, self.size)
 		else:
@@ -157,57 +157,57 @@ def process_FromInternet(number):
 		if len(FROM_INTERNET) != 0:
 			tempObj = FROM_INTERNET.pop(0)
 
-			if tempObj.webpage in ALL_WEBSITES: 
+			if tempObj.webpage in ALL_WEBSITES:
 			# the object is part of a webpage that we know
-				if tempObj.url in ALL_WEBSITES[tempObj.webpage].objects: 
+				if tempObj.url in ALL_WEBSITES[tempObj.webpage].objects:
 				# the object is a one that we have seen before
-					if tempObj.hash != ALL_WEBSITES[tempObj.webpage].objects[tempObj.url].hash: 
+					if tempObj.hash != ALL_WEBSITES[tempObj.webpage].objects[tempObj.url].hash:
 					# the hash of the object has changed, we need to update the object
 						processObject(tempObj, ALL_WEBSITES[tempObj.webpage].objects[tempObj.url])
 					else:
-						del tempObj 
+						del tempObj
 						# the object has not changed nothing to be done, we delete this object
 
-				else: 
+				else:
 				# object is a new one we need to add it to the list of the objects
 					# added the new object to the list of sites
-					ALL_WEBSITES[tempObj.webpage].objects[tempObj.url]=tempObj 
-					PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers, 
-											    tempObj.url, 
-											    tempObj.content, 
+					ALL_WEBSITES[tempObj.webpage].objects[tempObj.url]=tempObj
+					PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers,
+											    tempObj.url,
+											    tempObj.content,
 												tempObj.status,
-												tempObj.reason, 
-												tempObj.request_ver, 
+												tempObj.reason,
+												tempObj.request_ver,
 												False) )
 			else:
 				pass
 				#print ("(controller error): an object came with an unknown website ")
 				#but still we can send this to edge cache
-				PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers, 
-																	tempObj.url, 
-																	tempObj.content, 
-																	tempObj.status, 
-																	tempObj.reason, 
-																	tempObj.request_ver, 
+				PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers,
+																	tempObj.url,
+																	tempObj.content,
+																	tempObj.status,
+																	tempObj.reason,
+																	tempObj.request_ver,
 																	False) )
 
 def processObject(currentObject, previousObject):
 	currentTime = time.time()
-	
+
 	if currentObject.canApplyDiff and previousObject.canApplyDiff:
 		object_to_send = calculateDiff(currentObject, previousObject) # calculate Diff
 	else:
-		object_to_send = edgeCacheObject.EdgeObject(currentObject.headers, 
-													currentObject.url, 
-													currentObject.content, 
+		object_to_send = edgeCacheObject.EdgeObject(currentObject.headers,
+													currentObject.url,
+													currentObject.content,
 													currentObject.status,
-													currentObject.reason, 
-													currentObject.request_ver, 
+													currentObject.reason,
+													currentObject.request_ver,
 													False)
 	PUSH_TO_EDGE_CACHE.append(object_to_send)
 	previousObject.addTimeStamp(currentTime)
 	previousObject.copyObject(currentObject)
-	
+
 
 
 
@@ -217,22 +217,22 @@ def calculateDiff(new , old):
 	new_content = new.content.decode('utf-8')
 	var = diff_match_patch.diff_match_patch()
 	diff = var.diff_main(old_content, new_content ,  True)
-	
+
 	if len(diff) > 2:
 		var.diff_cleanupSemantic(diff)
-	
+
 	patch_list = var.patch_make(old_content, new_content, diff)
 	patch_text = var.patch_toText(patch_list)  # calculate diff
 	#make EdgeCacheObject with content being diff and diff variable as True
 	log_string = 'OBJECT_DIFF: '+str(len(old_content)) +' :'+ str(len(patch_text))
 	logging.info(log_string)
 
-	newO = edgeCacheObject.EdgeObject(	new.headers,  
-										new.url, 
-										patch_text, 
+	newO = edgeCacheObject.EdgeObject(	new.headers,
+										new.url,
+										patch_text,
 										new.status,
-										new.reason, 
-										new.request_ver, 
+										new.reason,
+										new.request_ver,
 										True)
 	return newO
 
@@ -243,7 +243,7 @@ def sendToEdgeCache(number):
 	global PUSH_TO_EDGE_CACHE
 	EdgeCache_IP = constants.EDGECACHE_IP # '195.229.110.139'
 	EdgeCache_PORT = constants.EDGECACHE_PORT_OBJECTS
-	
+
 	while True:
 		if len(PUSH_TO_EDGE_CACHE) > 0:
 			#print 'Sending Object  '
