@@ -45,6 +45,7 @@ class WebPage:
 
 class HTTPObject:
 	def __init__(self, headers, url, content, status, reason, request_ver, webpage, RTT ):
+		#print 'in con'
 		self.request_ver = request_ver
 		self.headers = headers
 		self.url = url
@@ -195,7 +196,10 @@ def processObject(currentObject, previousObject):
 	currentTime = time.time()
 
 	if currentObject.canApplyDiff and previousObject.canApplyDiff:
-		object_to_send = calculateDiff(currentObject, previousObject) # calculate Diff
+		try:
+			object_to_send = calculateDiff(currentObject, previousObject) # calculate Diff
+		except:
+			pass
 	else:
 		object_to_send = edgeCacheObject.EdgeObject(currentObject.headers,
 													currentObject.url,

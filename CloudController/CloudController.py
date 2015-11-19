@@ -18,6 +18,7 @@ from preFetching import *
 from OpenSSL.crypto import (X509Extension, X509, dump_privatekey, dump_certificate, load_certificate, load_privatekey,
 							PKey, TYPE_RSA, X509Req)
 from OpenSSL.SSL import FILETYPE_PEM
+
 class CertificateAuthority(object):
 
 	def __init__(self, ca_file='ca.pem', cache_dir=gettempdir()):
@@ -113,6 +114,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
 	def __init__(self, request, client_address, server):
 		self.is_connect = False
+		self.rtt = float(0.0000000)
+
 		try:
 			BaseHTTPRequestHandler.__init__(self, request, client_address, server)
 		except Exception, e:
@@ -141,8 +144,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
 		# Connect to destination
 		self._proxy_sock = socket()
 		self._proxy_sock.settimeout(10)
+		a = time.time()
 		self._proxy_sock.connect((self.hostname, int(self.port)))
-
+		self.rtt = float(time.time() - a)
 		# Wrap socket if SSL is required
 		if self.is_connect:
 			self._proxy_sock = wrap_socket(self._proxy_sock)
@@ -157,7 +161,6 @@ class ProxyHandler(BaseHTTPRequestHandler):
 		try:
 			# Connect to destination first
 			self._connect_to_host()
-
 			# If successful, let's do this!
 			self.send_response(200, 'Connection established')
 			self.end_headers()
@@ -178,7 +181,6 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
 		url_requested = self.path
 		refrer_requested = ''
-		#print url_requested
 		if not self.is_connect:
 			try:
 				# Connect to destination
@@ -188,26 +190,22 @@ class ProxyHandler(BaseHTTPRequestHandler):
 				return
 
 		req = '%s %s %s\r\n' % (self.command, self.path, self.request_version)
-
 		# Add headers to the request
-
+		webpage = ' '
 		if 'webpage' in self.headers:
 			webpage =  self.headers['webpage']
 
 
 		req += '%s\r\n' % self.headers
 		# Append message body if present to the request
-
 		if 'Content-Length' in self.headers:
 			req += self.rfile.read(int(self.headers['Content-Length']))
 
 		try:
-			time_a = time.time()
 			# Send it down the pipe!
 			self._proxy_sock.sendall(self.mitm_request(req))
 			# Parse response
 			h = HTTPResponse(self._proxy_sock)
-			time_b = float(time.time() - time_a)
 			h.begin()
 			# Get rid of the pesky header
 			del h.msg['Transfer-Encoding']
@@ -217,8 +215,12 @@ class ProxyHandler(BaseHTTPRequestHandler):
 			res += '%s\r\n' % h.msg
 			content_received = h.read()
 			res += content_received
-			HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, webpage, time_b) # TODO replace the 100 with RTT
-			controller.createObject(HTTPObject_received)
+
+			try:
+				HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, webpage, self.rtt) # TODO replace the 100 with RTT
+				controller.createObject(HTTPObject_received)
+			except Exception,e: 
+				print str(e)
 
 			self.request.sendall(self.mitm_response(res))
 
@@ -315,6 +317,7 @@ class DebugInterceptor(RequestInterceptorPlugin, ResponseInterceptorPlugin):
 if __name__ == '__main__':
 	proxy = None
 	controller.startController()
+	
 	if not argv[1:]:
 		proxy = AsyncMitmProxy()
 	else:
