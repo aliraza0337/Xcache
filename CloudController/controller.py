@@ -24,7 +24,7 @@ BW = constants.BW
 
 def startController():
 	thread.start_new_thread( process_FromInternet, (1,))
-	thread.start_new_thread( sendToEdgeCache, (1,))
+	#thread.start_new_thread( sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	FROM_INTERNET.append(objectReceived)
@@ -57,6 +57,7 @@ class HTTPObject:
 		self.getHeaderValues()
 
 		# web object attributes for Utility calculation
+		self.delta = [] 
 		self.timeToChange = []
 		self.expirationTime = time.time() + float(self.maxAge)
 		self.lastChangeTime = time.time()
@@ -90,7 +91,7 @@ class HTTPObject:
 		else:
 			ave_time = 0 
 
-		if ave_time < 1800:
+		if ave_time < constants.INTERVAL_PREFETCHING:
 			return True # if the change time > T
 		return False # if the change time < T
 
@@ -110,7 +111,7 @@ class HTTPObject:
 		self.hash = obj.hash
 		self.expirationTime = time.time() + float(self.maxAge)
 		self.lastChangeTime = time.time()
-		self.size = len(self.content)
+		self.size = len(self.content)*8
 
 	def calculateP(self):
 
@@ -123,7 +124,7 @@ class HTTPObject:
 				counter = counter + 1
 
 		if counter == 0:
-			return 0.0001
+			return 0
 		else:
 			return float (counter/len(self.timeToChange))
 
@@ -133,20 +134,25 @@ class HTTPObject:
 		N_req = ALL_WEBSITES[self.webpage].N
 		bandwidth = BW
 		q = 0
-		if self.lastChangeTime < self.expirationTime:
+		if time.time() > self.expirationTime:
 			q = 1
 		p = float(self.calculateP())
 		#
-		delta = 1
+
+		if len(self.delta) == 0: 
+			delta_value = 1
+		else:
+			delta_value = float(sum(delta_value)/len(delta_value))
+
 		n_t = N_req * q * (self.RTT + p*(self.size/BW))
 		n_b = N_req * q * p * self.size
 		#print ('Time Numirator: ', N_req, q , self.RTT, p , self.size, BW)
 		#print ('bandwidth Numirator: ', N_req, q , p , self.size)
 
 		if self.isX1():
-			timeBased = (p*delta*self.size)/BW
+			timeBased = (p*delta_value*self.size)/BW
 			#print ('timeBasedVariables: ', timeBased, p, delta, self.size, BW)
-			bandwidthBased = (p*delta*self.size)
+			bandwidthBased = (p*delta_value*self.size)
 			#print ('bandwidthBased: ', p, delta, self.size)
 		else:
 			timeBased = n_t
@@ -241,6 +247,8 @@ def calculateDiff(new , old):
 	#make EdgeCacheObject with content being diff and diff variable as True
 	log_string = 'OBJECT_DIFF:'+new.webpage+':'+str(len(old_content)) +' :'+ str(len(patch_text))
 	logging.info(log_string)
+	## to keep track of deltas
+	old.delta.append( len(patch_text)*8 )
 
 	newO = edgeCacheObject.EdgeObject(	new.headers,
 										new.url,
@@ -248,7 +256,8 @@ def calculateDiff(new , old):
 										new.status,
 										new.reason,
 										new.request_ver,
-										True)
+										True,
+										new.webpage)
 	return newO
 
 

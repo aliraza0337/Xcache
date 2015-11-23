@@ -159,36 +159,50 @@ def sitesPrefetching (number):
 
 
 def receiveLogs(num):
-	global ALL_WEBSITES
-	CONTROLLER_IP = constants.CONTROLLER_IP
-	print CONTROLLER_IP
-	CONTROLLER_PORT = constants.CONTROLLER_PORT_LOGS
-	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
-	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
-	s.bind((CONTROLLER_IP, CONTROLLER_PORT))
+	# global ALL_WEBSITES
+	# CONTROLLER_IP = constants.CONTROLLER_IP
+	# print CONTROLLER_IP
+	# CONTROLLER_PORT = constants.CONTROLLER_PORT_LOGS
+	# s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
+	# s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
+	# s.bind((CONTROLLER_IP, CONTROLLER_PORT))
 
-	while 1:
-		s.listen(1)
-		conn, addr = s.accept()
-		MESSAGE= ""
-		data = conn.recv(1024)
-		while data:
-			MESSAGE += data
-			data = conn.recv(1024)
-		websites = cPickle.loads(MESSAGE)
-		tmp = websites
-		print tmp
-		for siteInfo in tmp:
-			if siteInfo[0] in ALL_WEBSITES:
-				ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
-			else:
-				BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
-				ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
+	# while 1:
+	# 	s.listen(1)
+	# 	conn, addr = s.accept()
+	# 	MESSAGE= ""
+	# 	data = conn.recv(1024)
+	# 	while data:
+	# 		MESSAGE += data
+	# 		data = conn.recv(1024)
+	# 	websites = cPickle.loads(MESSAGE)
+	# 	tmp = websites
+	# 	print tmp
+	# 	for siteInfo in tmp:
+	# 		if siteInfo[0] in ALL_WEBSITES:
+	# 			ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
+	# 		else:
+	# 			BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
+	# 			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
 
-				log_string = 'ADDED FROM LOGS: '+siteInfo[0]
-				logging.info(log_string)
+	# 			log_string = 'ADDED FROM LOGS: '+siteInfo[0]
+	# 			logging.info(log_string)
 
-	return
+	# return
+
+
+	tmp = [('http://www.adobe.com/', 10)]
+	
+	for siteInfo in tmp:
+		if siteInfo[0] in ALL_WEBSITES:
+			ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
+		else:
+			BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
+			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
+			log_string = 'ADDED FROM LOGS: '+siteInfo[0]
+			logging.info(log_string)
+
+
 
 
 
