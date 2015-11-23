@@ -1,5 +1,5 @@
 class EdgeObject:
-	def __init__(self, headers, url, content, status, reason, request_ver, diff):
+	def __init__(self, headers, url, content, status, reason, request_ver, diff, webpage):
 		self.headers = headers
 		self.url = url 
 		self.content = content
@@ -7,3 +7,4 @@ class EdgeObject:
 		self.reason = reason
 		self.request_ver = request_ver
 		self.diff = diff
+		self.webpage = webpage

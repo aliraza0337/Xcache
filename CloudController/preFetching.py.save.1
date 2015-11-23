@@ -24,8 +24,8 @@ TIME =  constants.INTERVAL_PREFETCHING
 
 def startPrefetching(num):
 	thread.start_new_thread(receiveLogs, (1,))
-	thread.start_new_thread(bootstrap, (1,))
-	thread.start_new_thread(sitesPrefetching, (1,))
+	#thread.start_new_thread(bootstrap, (1,))
+	#thread.start_new_thread(sitesPrefetching, (1,))
 
 
 
@@ -36,7 +36,7 @@ def openPage (webpage):
 		'proxyType':ProxyType.MANUAL,
 		'httpProxy': myProxy,
 		'ftpProxy': myProxy,
-		'sslProxy': '',
+		'sslProxy': myProxy,
 		'noProxy': ''
 		})
 
@@ -216,7 +216,7 @@ def calculateUtilities():
 
 		t = float(float(n_t/d_t) + float(n_b/d_b))
 
-		log_string = 'UTILITY: '+webpage +' :TIME= '+str( float(n_t/d_t) )+':BW='+str(float(n_b/d_b))
+		log_string = 'UTILITY: '+webpage +' '+str(t)
 		logging.info(log_string)
 		PREFETCHING_QUEUE.put((t, webpage))
 	return PREFETCHING_QUEUE

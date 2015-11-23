@@ -23,6 +23,7 @@ PUSH_TO_EDGE_CACHE = []
 BW = constants.BW
 
 def startController():
+	logging.basicConfig(filename='controllerBW.log',level=logging.INFO)
 	thread.start_new_thread( process_FromInternet, (1,))
 	thread.start_new_thread( sendToEdgeCache, (1,))
 
@@ -44,6 +45,7 @@ class WebPage:
 
 class HTTPObject:
 	def __init__(self, headers, url, content, status, reason, request_ver, webpage, RTT ):
+		#print 'in con'
 		self.request_ver = request_ver
 		self.headers = headers
 		self.url = url
@@ -83,15 +85,7 @@ class HTTPObject:
 		return res
 
 	def isX1 (self):
-		l_sum = sum(self.timeToChange)
-		l = len(self.timeToChange)
-		if l != 0:
-			ave_time = float(l_sum/l)
-		else:
-			ave_time = 0 
-
-		if ave_time < 1800:
-			return True # if the change time > T
+		return True # if the change time > T
 		return False # if the change time < T
 
 	def addTimeStamp(self, t):
@@ -135,8 +129,8 @@ class HTTPObject:
 		q = 0
 		if self.lastChangeTime < self.expirationTime:
 			q = 1
+
 		p = float(self.calculateP())
-		#
 		delta = 1
 		n_t = N_req * q * (self.RTT + p*(self.size/BW))
 		n_b = N_req * q * p * self.size
@@ -185,11 +179,9 @@ def process_FromInternet(number):
 												tempObj.status,
 												tempObj.reason,
 												tempObj.request_ver,
-												False, 
-												tempObj.webpage) )
+												False) )
 			else:
 				pass
-				#print ("(controller error): an object came with an unknown website ")
 				#but still we can send this to edge cache
 				PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers,
 																	tempObj.url,
@@ -197,8 +189,7 @@ def process_FromInternet(number):
 																	tempObj.status,
 																	tempObj.reason,
 																	tempObj.request_ver,
-																	False, 
-																	tempObj.webpage) )
+																	False) )
 
 def processObject(currentObject, previousObject):
 	currentTime = time.time()
@@ -206,9 +197,7 @@ def processObject(currentObject, previousObject):
 	if currentObject.canApplyDiff and previousObject.canApplyDiff:
 		try:
 			object_to_send = calculateDiff(currentObject, previousObject) # calculate Diff
-			
 		except:
-			return
 			pass
 	else:
 		object_to_send = edgeCacheObject.EdgeObject(currentObject.headers,
@@ -217,8 +206,7 @@ def processObject(currentObject, previousObject):
 													currentObject.status,
 													currentObject.reason,
 													currentObject.request_ver,
-													False, 
-													currentObject.webpage)
+													False)
 	PUSH_TO_EDGE_CACHE.append(object_to_send)
 	previousObject.addTimeStamp(currentTime)
 	previousObject.copyObject(currentObject)
@@ -239,7 +227,7 @@ def calculateDiff(new , old):
 	patch_list = var.patch_make(old_content, new_content, diff)
 	patch_text = var.patch_toText(patch_list)  # calculate diff
 	#make EdgeCacheObject with content being diff and diff variable as True
-	log_string = 'OBJECT_DIFF:'+new.webpage+':'+str(len(old_content)) +' :'+ str(len(patch_text))
+	log_string = 'OBJECT_DIFF: '+str(len(old_content)) +' :'+ str(len(patch_text))
 	logging.info(log_string)
 
 	newO = edgeCacheObject.EdgeObject(	new.headers,
@@ -265,7 +253,7 @@ def sendToEdgeCache(number):
 			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
 
 			if not edgeObject.diff:
-				log_string = 'OBJECT: '+edgeObject.webpage+':'+str(len(edgeObject.content))
+				log_string = 'OBJECT: '+str(len(edgeObject.content))
 				logging.info(log_string)
 
 			MESSAGE = cPickle.dumps(edgeObject)

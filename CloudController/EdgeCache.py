@@ -44,7 +44,7 @@ def listenFromController(num):
 			MESSAGE += data
 			data = conn.recv(1024)
 		edgeObject = cPickle.loads(MESSAGE)
-		print edgeObject.url[:50]
+		#print edgeObject.url[:50]
 		ALL_OBJECTS.append(edgeObject)
 		time.sleep(0.001)
 
@@ -54,7 +54,7 @@ def push_in_cache(edgeObject, mode):
 	res = '%s %s %s\r\n' % (edgeObject.request_ver, edgeObject.status, edgeObject.reason)
 	N = 15 
 	file_name = ''.join(random.choice(stringRandom.ascii_uppercase + stringRandom.digits) for _ in range(N))
-	print 'ready to push    ' + edgeObject.url + ':'+ file_name
+	print 'ready to push    :'+ file_name
 
 	for header in edgeObject.headers:
 		res += header[0] + ": " + header[1] +"\n"
@@ -66,8 +66,9 @@ def push_in_cache(edgeObject, mode):
 
 	path = 'cache/'+file_name+'.txt'
 	command = 'sudo ./tspush -f cache/'+file_name+'.txt -u http://'+constants.APS_IP_PORT+' -s '+edgeObject.url
+	#print command
 	os.system(command)
-	time.sleep(0.1)
+	time.sleep(0.08)
 	os.system('rm '+path)
 
 

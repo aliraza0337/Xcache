@@ -113,6 +113,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 	r = compile(r'http://[^/]+(/?.*)(?i)')
 
 	def __init__(self, request, client_address, server):
+		#print 'request' + request
 		self.is_connect = False
 		self.rtt = float(0.0000000)
 
@@ -124,7 +125,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 		# Get hostname and port to connect to
 		if self.is_connect:
 			self.hostname, self.port = self.path.split(':')
-		else:
+		else:	
 			u = urlparse(self.path)
 			if u.scheme != 'http':
 				raise UnsupportedSchemeException('Unknown scheme %s' % repr(u.scheme))
@@ -178,8 +179,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
 	def do_COMMAND(self):
 		h = None
-
+		#print '------'+ self.path
 		url_requested = self.path
+		#print url_requested
 		refrer_requested = ''
 		if not self.is_connect:
 			try:
