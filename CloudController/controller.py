@@ -93,6 +93,8 @@ class HTTPObject:
 			ave_time = l_sum/float(l)
 		else:
 			ave_time = 0.0 
+		
+		print ('ave_time', ave_time)
 
 		if ave_time < constants.INTERVAL_PREFETCHING:
 			return True # if the change time > T
@@ -139,35 +141,34 @@ class HTTPObject:
 		N_req = ALL_WEBSITES[self.webpage].N
 		bandwidth = BW
 		q = 0
-		#print 'N_Req: '+ str(N_req)
-		#print 'Bandwidth: '+ str(bandwidth)
 
-	
 		if time.time() > self.expirationTime:
 			q = 1
-		#print ('time , exp_time ', time.time(), self.expirationTime)
-		#print 'q: '+ str(q)
+
 		p = float(self.calculateP())
-		#
-		#print 'p: '+str(p)
 
 		if len(self.delta) == 0: 
 			delta_value = 1
 		else:
-			delta_value = float(sum(self.delta)/len(self.delta))
+			delta_value = sum(self.delta)/float(len(self.delta))
 
-		#print 'delta'+ str(self.delta)
+		print ('delta_value', delta_value)
 
-		n_t = N_req * q * (self.RTT + p*(self.size/BW))
+		n_t = N_req * q * (self.RTT + p*( self.size/float(BW) ) )
 		n_b = N_req * q * p * self.size
-		#print ('Time Numirator: ', N_req, q , self.RTT, p , self.size, BW)
-	#	print ('bandwidth Numirator: ', N_req, q , p , self.size)
+
+		print ('Time Numirator: ', N_req, q , self.RTT, p , self.size, BW)
+		print ('n_t', n_t)
+		print ('bandwidth Numirator: ', N_req, q , p , self.size)
+		print ('n_b', n_b)
 
 		if self.isX1():
-			timeBased = (p*delta_value*self.size)/BW
-			#print ('timeBasedVariables: ', timeBased, p, delta_value, self.size, BW)
+			timeBased = (p*delta_value*self.size)/float(BW)
+			print ('timeBasedVariables: ', timeBased, p, delta_value, self.size, BW)
+			print ('timeBased', timeBased)
 			bandwidthBased = (p*delta_value*self.size)
-			#print ('bandwidthBased: ', p, delta_value, self.size)
+			print ('bandwidthBasedVariables: ', p, delta_value, self.size)
+			print ('bandwidthBased', bandwidthBased)
 		else:
 			timeBased = n_t
 			bandwidthBased = n_b
