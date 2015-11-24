@@ -59,7 +59,10 @@ class HTTPObject:
 		# web object attributes for Utility calculation
 		self.delta = [] 
 		self.timeToChange = []
+		#print self.maxAge 
 		self.expirationTime = time.time() + float(self.maxAge)
+		#print self.headers
+		#print ('maxage, time, exp_ime', self.maxAge , time.time(), self.expirationTime)
 		self.lastChangeTime = time.time()
 		self.RTT = RTT
 		self.size = len(content)*8
@@ -87,9 +90,9 @@ class HTTPObject:
 		l_sum = sum(self.timeToChange)
 		l = len(self.timeToChange)
 		if l != 0:
-			ave_time = float(l_sum/l)
+			ave_time = l_sum/float(l)
 		else:
-			ave_time = 0 
+			ave_time = 0.0 
 
 		if ave_time < constants.INTERVAL_PREFETCHING:
 			return True # if the change time > T
@@ -124,9 +127,11 @@ class HTTPObject:
 				counter = counter + 1
 
 		if counter == 0:
-			return 0
-		else:
-			return float (counter/len(self.timeToChange))
+			return 0.0
+		else:	
+			l = len(self.timeToChange)
+			res =  counter/float(l)
+			return res
 
 	def calculateUtilities(self):
 		global ALL_WEBSITES, BW
@@ -134,26 +139,35 @@ class HTTPObject:
 		N_req = ALL_WEBSITES[self.webpage].N
 		bandwidth = BW
 		q = 0
+		#print 'N_Req: '+ str(N_req)
+		#print 'Bandwidth: '+ str(bandwidth)
+
+	
 		if time.time() > self.expirationTime:
 			q = 1
+		#print ('time , exp_time ', time.time(), self.expirationTime)
+		#print 'q: '+ str(q)
 		p = float(self.calculateP())
 		#
+		#print 'p: '+str(p)
 
 		if len(self.delta) == 0: 
 			delta_value = 1
 		else:
-			delta_value = float(sum(delta_value)/len(delta_value))
+			delta_value = float(sum(self.delta)/len(self.delta))
+
+		#print 'delta'+ str(self.delta)
 
 		n_t = N_req * q * (self.RTT + p*(self.size/BW))
 		n_b = N_req * q * p * self.size
 		#print ('Time Numirator: ', N_req, q , self.RTT, p , self.size, BW)
-		#print ('bandwidth Numirator: ', N_req, q , p , self.size)
+	#	print ('bandwidth Numirator: ', N_req, q , p , self.size)
 
 		if self.isX1():
 			timeBased = (p*delta_value*self.size)/BW
-			#print ('timeBasedVariables: ', timeBased, p, delta, self.size, BW)
+			#print ('timeBasedVariables: ', timeBased, p, delta_value, self.size, BW)
 			bandwidthBased = (p*delta_value*self.size)
-			#print ('bandwidthBased: ', p, delta, self.size)
+			#print ('bandwidthBased: ', p, delta_value, self.size)
 		else:
 			timeBased = n_t
 			bandwidthBased = n_b
@@ -175,6 +189,7 @@ def process_FromInternet(number):
 				if tempObj.url in ALL_WEBSITES[tempObj.webpage].objects:
 				# the object is a one that we have seen before
 					if tempObj.hash != ALL_WEBSITES[tempObj.webpage].objects[tempObj.url].hash:
+						print 'Object Changed'
 					# the hash of the object has changed, we need to update the object
 						processObject(tempObj, ALL_WEBSITES[tempObj.webpage].objects[tempObj.url])
 					else:

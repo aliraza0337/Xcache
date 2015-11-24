@@ -191,7 +191,7 @@ def receiveLogs(num):
 	# return
 
 
-	tmp = [('http://www.adobe.com/', 10)]
+	tmp = [('http://www.cnn.com/', 10)]
 	
 	for siteInfo in tmp:
 		if siteInfo[0] in ALL_WEBSITES:
@@ -229,8 +229,9 @@ def calculateUtilities():
 			d_b = 1
 
 		t = float(float(n_t/d_t) + float(n_b/d_b))
-
+	
 		log_string = 'UTILITY: '+webpage +' :TIME= '+str( float(n_t/d_t) )+':BW='+str(float(n_b/d_b))
+		print log_string
 		logging.info(log_string)
 		PREFETCHING_QUEUE.put((t, webpage))
 	return PREFETCHING_QUEUE
