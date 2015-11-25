@@ -61,8 +61,6 @@ class HTTPObject:
 		self.timeToChange = []
 		#print self.maxAge 
 		self.expirationTime = time.time() + float(self.maxAge)
-		#print self.headers
-		#print ('maxage, time, exp_ime', self.maxAge , time.time(), self.expirationTime)
 		self.lastChangeTime = time.time()
 		self.RTT = RTT
 		self.size = len(content)*8
@@ -94,7 +92,6 @@ class HTTPObject:
 		else:
 			ave_time = 0.0 
 		
-		print ('ave_time', ave_time)
 
 		if ave_time < constants.INTERVAL_PREFETCHING:
 			return True # if the change time > T
@@ -147,28 +144,17 @@ class HTTPObject:
 
 		p = float(self.calculateP())
 
-		if len(self.delta) == 0: 
+		if len(self.delta) == 0:
 			delta_value = 1
-		else:
+		else:	
 			delta_value = sum(self.delta)/float(len(self.delta))
-
-		print ('delta_value', delta_value)
 
 		n_t = N_req * q * (self.RTT + p*( self.size/float(BW) ) )
 		n_b = N_req * q * p * self.size
 
-		print ('Time Numirator: ', N_req, q , self.RTT, p , self.size, BW)
-		print ('n_t', n_t)
-		print ('bandwidth Numirator: ', N_req, q , p , self.size)
-		print ('n_b', n_b)
-
 		if self.isX1():
 			timeBased = (p*delta_value*self.size)/float(BW)
-			print ('timeBasedVariables: ', timeBased, p, delta_value, self.size, BW)
-			print ('timeBased', timeBased)
 			bandwidthBased = (p*delta_value*self.size)
-			print ('bandwidthBasedVariables: ', p, delta_value, self.size)
-			print ('bandwidthBased', bandwidthBased)
 		else:
 			timeBased = n_t
 			bandwidthBased = n_b
@@ -211,7 +197,6 @@ def process_FromInternet(number):
 												tempObj.webpage) )
 			else:
 				pass
-				#print ("(controller error): an object came with an unknown website ")
 				#but still we can send this to edge cache
 				PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers,
 																	tempObj.url,
@@ -244,7 +229,7 @@ def processObject(currentObject, previousObject):
 	PUSH_TO_EDGE_CACHE.append(object_to_send)
 	previousObject.addTimeStamp(currentTime)
 	previousObject.copyObject(currentObject)
-
+	#print ('Valuedelta:', previousObject.delta)
 
 
 
@@ -263,9 +248,8 @@ def calculateDiff(new , old):
 	#make EdgeCacheObject with content being diff and diff variable as True
 	log_string = 'OBJECT_DIFF:'+new.webpage+':'+str(len(old_content)) +' :'+ str(len(patch_text))
 	logging.info(log_string)
-	## to keep track of deltas
+	# to keep track of deltas
 	old.delta.append( len(patch_text)*8 )
-
 	newO = edgeCacheObject.EdgeObject(	new.headers,
 										new.url,
 										patch_text,
