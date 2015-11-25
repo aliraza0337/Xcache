@@ -1,6 +1,0 @@
-GET http://www.apple.com/ 
-GET http://www.apple.com/ 
-GET http://www.souq.com/ 
-GET http://cnn.com/ 
-GET http://www.cnn.com/ 
-GET http://edition.cnn.com/ 
