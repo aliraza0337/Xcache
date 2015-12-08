@@ -174,62 +174,63 @@ def sitesPrefetching (number):
 
 
 def receiveLogs(num):
-	# global ALL_WEBSITES
-	# CONTROLLER_IP = constants.CONTROLLER_IP
-	# print CONTROLLER_IP
-	# CONTROLLER_PORT = constants.CONTROLLER_PORT_LOGS
-	# s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
-	# s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
-	# s.bind((CONTROLLER_IP, CONTROLLER_PORT))
 
-	# while 1:
-	# 	s.listen(1)
-	# 	conn, addr = s.accept()
-	# 	MESSAGE= ""
-	# 	data = conn.recv(1024)
-	# 	while data:
-	# 		MESSAGE += data
-	# 		data = conn.recv(1024)
-	# 	websites = cPickle.loads(MESSAGE)
-	# 	tmp = websites
-	# 	print tmp
-	# 	for siteInfo in tmp:
-	# 		if siteInfo[0] in ALL_WEBSITES:
-	# 			ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
-	# 		else:
-	# 			BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
-	# 			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
+	global ALL_WEBSITES
+	CONTROLLER_IP = constants.CONTROLLER_IP
+	print CONTROLLER_IP
+	CONTROLLER_PORT = constants.CONTROLLER_PORT_LOGS
+	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
+	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
+	s.bind((CONTROLLER_IP, CONTROLLER_PORT))
 
-	# 			log_string = 'ADDED FROM LOGS: '+siteInfo[0]
-	# 			logging.info(log_string)
+	while 1:
+		s.listen(1)
+		conn, addr = s.accept()
+		MESSAGE= ""
+		data = conn.recv(1024)
+		while data:
+			MESSAGE += data
+			data = conn.recv(1024)
+		websites = cPickle.loads(MESSAGE)
+		tmp = websites
+		print tmp
+		for siteInfo in tmp:
+			if siteInfo[0] in ALL_WEBSITES:
+				ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
+			else:
+				BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
+				ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
 
-	# return
+				log_string = 'ADDED FROM LOGS: '+siteInfo[0]
+				logging.info(log_string)
+
+	return
 
 
-	tmp = [ ('http://www.cnn.com/', 10), 
-		('http://www.bbc.com/', 10),  
-		('http://www.espn.com/', 10),  
-		('http://www.yahoo.com/', 10),  
-		('http://www.microsoft.com/', 10),  
-		('http://www.msn.com/', 10),  
-		('http://www.youtube.com/', 10),  
-		('http://www.booking.com/', 10), 
-		('http://www.amazon.com/', 10), 
-		('http://www.alibaba.com/', 10), 
-		('http://www.nytimes.com/', 10), 
-		('http://www.dailymail.com/', 10), 
-		('http://www.apple.com/', 10), 
-		('http://www.tv.com/', 10), 
-		('http://www.tvguide.com/', 10)]
+	# tmp = [ ('http://www.cnn.com/', 10), 
+	# 	('http://www.bbc.com/', 10),  
+	# 	('http://www.espn.com/', 10),  
+	# 	('http://www.yahoo.com/', 10),  
+	# 	('http://www.microsoft.com/', 10),  
+	# 	('http://www.msn.com/', 10),  
+	# 	('http://www.youtube.com/', 10),  
+	# 	('http://www.booking.com/', 10), 
+	# 	('http://www.amazon.com/', 10), 
+	# 	('http://www.alibaba.com/', 10), 
+	# 	('http://www.nytimes.com/', 10), 
+	# 	('http://www.dailymail.com/', 10), 
+	# 	('http://www.apple.com/', 10), 
+	# 	('http://www.tv.com/', 10), 
+	# 	('http://www.tvguide.com/', 10)]
 	
-	for siteInfo in tmp:
-		if siteInfo[0] in ALL_WEBSITES:
-			ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
-		else:
-			BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
-			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
-			log_string = 'ADDED FROM LOGS: '+siteInfo[0]
-			logger_1.info(log_string)
+	# for siteInfo in tmp:
+	# 	if siteInfo[0] in ALL_WEBSITES:
+	# 		ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
+	# 	else:
+	# 		BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
+	# 		ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
+	# 		log_string = 'ADDED FROM LOGS: '+siteInfo[0]
+	# 		logger_1.info(log_string)
 
 
 
@@ -263,7 +264,7 @@ def calculateUtilities():
 
 		t = float(float(n_t/d_t) + float(n_b/d_b))
 		log_string = 'UTILITY: '+webpage +' :TIME= '+str( n_t/float(d_t) )+':BW='+str( n_b/float(d_b))
-		print log_string
+		#print log_string
 		logger_1.info(log_string)
 		logger_2.info(log_string)
 		PREFETCHING_QUEUE.put((t, webpage))
