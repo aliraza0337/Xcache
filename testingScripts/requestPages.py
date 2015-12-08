@@ -10,7 +10,7 @@ import cPickle
 import logging
 import random 
 
-logging.basicConfig(filename='userRequests.log',level=logging.INFO)
+#logging.basicConfig(filename='userRequests.log',level=logging.INFO)
 ALL_WEBSITES = []
 
 def openPage (webpage):
@@ -19,8 +19,8 @@ def openPage (webpage):
 	proxy = Proxy ({
 		'proxyType':ProxyType.MANUAL,
 		'httpProxy': myProxy,
-		'ftpProxy': myProxy,
-		'sslProxy': myProxy,
+		'ftpProxy': '',
+		'sslProxy': '',
 		'noProxy': ''
 		})
 
@@ -90,12 +90,15 @@ def StartPrefectching():
 		w = random.randint(0, total_webpages-1)
 		timeToSleep = random.randint(100, 150)
 		print webpages[w]
-		openPage(webpages[w])
+		try:
+			openPage(webpages[w])
+		except:
+			pass
 		display.stop()
-		time.sleep(timeToSleep)
+		#time.sleep(timeToSleep)
 		log_string = 'REQUESTING: '+ str(time.time())+ ': '+webpages[w]
 		print log_string
-		logging.info(log_string)
+		#logging.info(log_string)
 
 
 StartPrefectching()

@@ -12,7 +12,23 @@ import logging
 import controller
 import constants
 global ALL_WEBSITES, PREFETCHING_QUEUE, PREFETCHING_LIST
-logging.basicConfig(filename='prefetching.log',level=logging.INFO)
+
+
+#formatter = logging.Formatter('%(asctime)s %(message)s')
+
+logger_1 = logging.getLogger('simple_logger')
+logger_1.setLevel(logging.INFO)
+hdlr_1 = logging.FileHandler('prefetching.log')
+#hdlr_1.setFormatter(formatter)
+logger_1.addHandler(hdlr_1)
+
+logger_2 = logging.getLogger('simple_logger_2')
+logger_2.setLevel(logging.INFO)
+hdlr_2 = logging.FileHandler('utilitycalculation.log')
+#hdlr_1.setFormatter(formatter)
+logger_2.addHandler(hdlr_2)
+
+
 PREFETCHING_LIST = []
 PREFETCHING_QUEUE = Q.PriorityQueue()
 
@@ -101,7 +117,7 @@ def bootstrap(a):
 					print ('Bootstraping: ', item, 'for: ',BOOTSTRAPSITES[item][0] )
 
 					log_string = 'BOOTSTRAP: '+str(time.time()) +' :'+item
-					logging.info(log_string)
+					logger_1.info(log_string)
 					try:
 						openPage(item)
 					except:
@@ -128,7 +144,6 @@ def sitesPrefetching (number):
 		global PREFETCHING_QUEUE , TIME, PREFETCHING_LIST
 		startTime = time.time()
 		if len(PREFETCHING_LIST) > 0:
-			print 'Calculate U'
 			PREFETCHING_QUEUE = calculateUtilities()
 			print PREFETCHING_QUEUE
 
@@ -141,7 +156,7 @@ def sitesPrefetching (number):
 
 			log_string = 'PREFETCHING: '+str(time.time()) +' :'+w[1]
 			print log_string
-			logging.info(log_string)
+			logger_1.info(log_string)
 			try:
 				openPage(w[1])
 			except:
@@ -191,7 +206,21 @@ def receiveLogs(num):
 	# return
 
 
-	tmp = [('http://www.cnn.com/', 10)]
+	tmp = [ ('http://www.cnn.com/', 10), 
+		('http://www.bbc.com/', 10),  
+		('http://www.espn.com/', 10),  
+		('http://www.yahoo.com/', 10),  
+		('http://www.microsoft.com/', 10),  
+		('http://www.msn.com/', 10),  
+		('http://www.youtube.com/', 10),  
+		('http://www.booking.com/', 10), 
+		('http://www.amazon.com/', 10), 
+		('http://www.alibaba.com/', 10), 
+		('http://www.nytimes.com/', 10), 
+		('http://www.dailymail.com/', 10), 
+		('http://www.apple.com/', 10), 
+		('http://www.tv.com/', 10), 
+		('http://www.tvguide.com/', 10)]
 	
 	for siteInfo in tmp:
 		if siteInfo[0] in ALL_WEBSITES:
@@ -200,7 +229,7 @@ def receiveLogs(num):
 			BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
 			ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
 			log_string = 'ADDED FROM LOGS: '+siteInfo[0]
-			logging.info(log_string)
+			logger_1.info(log_string)
 
 
 
@@ -217,22 +246,26 @@ def calculateUtilities():
 		n_b = float(0.000)
 		d_b = float(0.000)
 		webPageObjects = ALL_WEBSITES[webpage].objects
+		logger_2.info('Utility Calculation: ' + webpage)
 		for o in webPageObjects.keys():
-			x1, x2, x3, x4 = webPageObjects[o].calculateUtilities()
+			x1, x2, x3, x4, st = webPageObjects[o].calculateUtilities()
+			print st
 			n_t = n_t + x1
 			d_t = d_t + x2
 			n_b = n_b + x3
 			d_b = d_b + x4
+			logger_2.info(st)
+		
 		if d_t == 0:
 			d_t = 1
 		if d_b == 0:
 			d_b = 1
 
 		t = float(float(n_t/d_t) + float(n_b/d_b))
-	
-		log_string = 'UTILITY: '+webpage +' :TIME= '+str( float(n_t/d_t) )+':BW='+str(float(n_b/d_b))
+		log_string = 'UTILITY: '+webpage +' :TIME= '+str( n_t/float(d_t) )+':BW='+str( n_b/float(d_b))
 		print log_string
-		logging.info(log_string)
+		logger_1.info(log_string)
+		logger_2.info(log_string)
 		PREFETCHING_QUEUE.put((t, webpage))
 	return PREFETCHING_QUEUE
 

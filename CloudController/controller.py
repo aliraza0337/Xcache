@@ -22,6 +22,14 @@ FROM_INTERNET = []
 PUSH_TO_EDGE_CACHE = []
 BW = constants.BW
 
+
+logger_1 = logging.getLogger('simple_logger_3')
+logger_1.setLevel(logging.INFO)
+hdlr_1 = logging.FileHandler('objectsanddiffs.log')
+logger_1.addHandler(hdlr_1)
+
+
+
 def startController():
 	thread.start_new_thread( process_FromInternet, (1,))
 	#thread.start_new_thread( sendToEdgeCache, (1,))
@@ -90,7 +98,7 @@ class HTTPObject:
 		if l != 0:
 			ave_time = l_sum/float(l)
 		else:
-			ave_time = 0.0 
+			return False 
 		
 
 		if ave_time < constants.INTERVAL_PREFETCHING:
@@ -145,21 +153,24 @@ class HTTPObject:
 		p = float(self.calculateP())
 
 		if len(self.delta) == 0:
-			delta_value = 1
+			delta_value = self.size
 		else:	
 			delta_value = sum(self.delta)/float(len(self.delta))
 
 		n_t = N_req * q * (self.RTT + p*( self.size/float(BW) ) )
-		n_b = N_req * q * p * self.size
-
+		n_b = N_req*q*p*self.size
+		x1orx2 = 'x2'
+		
 		if self.isX1():
-			timeBased = (p*delta_value*self.size)/float(BW)
-			bandwidthBased = (p*delta_value*self.size)
+			x1orx2 = 'x1'
+			timeBased = (p*delta_value)/float(BW)
+			bandwidthBased = p*delta_value
 		else:
 			timeBased = n_t
 			bandwidthBased = n_b
 
-		return n_t, timeBased, n_b, bandwidthBased
+		logstring = ('n_req, q, rtt, p, size, delta', N_req, q, self.RTT, p , self.size, delta_value, x1orx2)
+		return n_t, timeBased, n_b, bandwidthBased , logstring
 
 
 
@@ -215,6 +226,7 @@ def processObject(currentObject, previousObject):
 			object_to_send = calculateDiff(currentObject, previousObject) # calculate Diff
 			
 		except:
+			logger_1.info('Could not calculate diff -- ' + currentObject.url)
 			return
 			pass
 	else:
@@ -229,7 +241,6 @@ def processObject(currentObject, previousObject):
 	PUSH_TO_EDGE_CACHE.append(object_to_send)
 	previousObject.addTimeStamp(currentTime)
 	previousObject.copyObject(currentObject)
-	#print ('Valuedelta:', previousObject.delta)
 
 
 
@@ -247,7 +258,7 @@ def calculateDiff(new , old):
 	patch_text = var.patch_toText(patch_list)  # calculate diff
 	#make EdgeCacheObject with content being diff and diff variable as True
 	log_string = 'OBJECT_DIFF:'+new.webpage+':'+str(len(old_content)) +' :'+ str(len(patch_text))
-	logging.info(log_string)
+	logger_1.info(log_string)
 	# to keep track of deltas
 	old.delta.append( len(patch_text)*8 )
 	newO = edgeCacheObject.EdgeObject(	new.headers,
@@ -275,7 +286,7 @@ def sendToEdgeCache(number):
 
 			if not edgeObject.diff:
 				log_string = 'OBJECT: '+edgeObject.webpage+':'+str(len(edgeObject.content))
-				logging.info(log_string)
+				logger_1.info(log_string)
 
 			MESSAGE = cPickle.dumps(edgeObject)
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
