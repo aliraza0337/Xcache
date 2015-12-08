@@ -179,6 +179,7 @@ def receiveLogs(num):
 	CONTROLLER_IP = constants.CONTROLLER_IP
 	print CONTROLLER_IP
 	CONTROLLER_PORT = constants.CONTROLLER_PORT_LOGS
+	print CONTROLLER_PORT
 	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
 	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
 	s.bind((CONTROLLER_IP, CONTROLLER_PORT))
