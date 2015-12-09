@@ -14,18 +14,15 @@ import constants
 global ALL_WEBSITES, PREFETCHING_QUEUE, PREFETCHING_LIST
 
 
-#formatter = logging.Formatter('%(asctime)s %(message)s')
 
 logger_1 = logging.getLogger('simple_logger')
 logger_1.setLevel(logging.INFO)
 hdlr_1 = logging.FileHandler('prefetching.log')
-#hdlr_1.setFormatter(formatter)
 logger_1.addHandler(hdlr_1)
 
 logger_2 = logging.getLogger('simple_logger_2')
 logger_2.setLevel(logging.INFO)
 hdlr_2 = logging.FileHandler('utilitycalculation.log')
-#hdlr_1.setFormatter(formatter)
 logger_2.addHandler(hdlr_2)
 
 
@@ -45,7 +42,7 @@ def startPrefetching(num):
 
 
 
-def openPage (webpage):
+def openPage (webpage, check):
 
 	myProxy = "127.0.0.1:9999"
 	proxy = Proxy ({
@@ -75,7 +72,7 @@ def openPage (webpage):
 	profile.set_preference('modifyheaders.headers.count', 1)
 	profile.set_preference('modifyheaders.headers.action0', "Add")
 	profile.set_preference('modifyheaders.headers.name0', 'webpage')
-	profile.set_preference('modifyheaders.headers.value0', webpage)
+	profile.set_preference('modifyheaders.headers.value0', check+':'+webpage)
 	profile.set_preference('modifyheaders.headers.enabled0', True)
 	profile.set_preference('modifyheaders.config.active', True)
 	profile.set_preference('modifyheaders.config.alwaysOn', True)
@@ -119,7 +116,7 @@ def bootstrap(a):
 					log_string = 'BOOTSTRAP: '+str(time.time()) +' :'+item
 					logger_1.info(log_string)
 					try:
-						openPage(item)
+						openPage(item, 'b')
 					except:
 						pass
 					BOOTSTRAPSITES [item][0]-=1
@@ -140,7 +137,6 @@ def bootstrap(a):
 def sitesPrefetching (number):
 	PREFETCHING_BOOL = False
 	while True:
-
 		global PREFETCHING_QUEUE , TIME, PREFETCHING_LIST
 		startTime = time.time()
 		if len(PREFETCHING_LIST) > 0:
@@ -158,7 +154,7 @@ def sitesPrefetching (number):
 			print log_string
 			logger_1.info(log_string)
 			try:
-				openPage(w[1])
+				openPage(w[1] , 'p')
 			except:
 				pass
 			display.stop()
@@ -203,7 +199,7 @@ def receiveLogs(num):
 				ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
 
 				log_string = 'ADDED FROM LOGS: '+siteInfo[0]
-				logging.info(log_string)
+				logger_1.info(log_string)
 
 	return
 
