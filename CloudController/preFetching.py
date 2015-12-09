@@ -204,21 +204,7 @@ def receiveLogs(num):
 	return
 
 
-	# tmp = [ ('http://www.cnn.com/', 10), 
-	# 	('http://www.bbc.com/', 10),  
-	# 	('http://www.espn.com/', 10),  
-	# 	('http://www.yahoo.com/', 10),  
-	# 	('http://www.microsoft.com/', 10),  
-	# 	('http://www.msn.com/', 10),  
-	# 	('http://www.youtube.com/', 10),  
-	# 	('http://www.booking.com/', 10), 
-	# 	('http://www.amazon.com/', 10), 
-	# 	('http://www.alibaba.com/', 10), 
-	# 	('http://www.nytimes.com/', 10), 
-	# 	('http://www.dailymail.com/', 10), 
-	# 	('http://www.apple.com/', 10), 
-	# 	('http://www.tv.com/', 10), 
-	# 	('http://www.tvguide.com/', 10)]
+	# tmp = [ ('http://www.cnn.com/', 10)]
 	
 	# for siteInfo in tmp:
 	# 	if siteInfo[0] in ALL_WEBSITES:

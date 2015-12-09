@@ -32,7 +32,7 @@ logger_1.addHandler(hdlr_1)
 
 def startController():
 	thread.start_new_thread( process_FromInternet, (1,))
-	thread.start_new_thread( sendToEdgeCache, (1,))
+	#thread.start_new_thread( sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	FROM_INTERNET.append(objectReceived)
@@ -51,7 +51,7 @@ class WebPage:
 
 
 class HTTPObject:
-	def __init__(self, headers, url, content, status, reason, request_ver, webpage, RTT ):
+	def __init__(self, headers, url, content, status, reason, request_ver, webpage, phase, RTT ):
 		self.request_ver = request_ver
 		self.headers = headers
 		self.url = url
@@ -59,6 +59,7 @@ class HTTPObject:
 		self.status = status
 		self.reason = reason
 		self.webpage = webpage
+		self.phase = phase
 		self.canApplyDiff = False
 		self.maxAge = 0
 		self.hash = hashlib.sha224(self.content).hexdigest()
@@ -187,7 +188,7 @@ def process_FromInternet(number):
 				if tempObj.url in ALL_WEBSITES[tempObj.webpage].objects:
 				# the object is a one that we have seen before
 					if tempObj.hash != ALL_WEBSITES[tempObj.webpage].objects[tempObj.url].hash:
-						print 'Object Changed'
+						#print 'Object Changed'
 					# the hash of the object has changed, we need to update the object
 						processObject(tempObj, ALL_WEBSITES[tempObj.webpage].objects[tempObj.url])
 					else:
@@ -198,6 +199,10 @@ def process_FromInternet(number):
 				# object is a new one we need to add it to the list of the objects
 					# added the new object to the list of sites
 					ALL_WEBSITES[tempObj.webpage].objects[tempObj.url]=tempObj
+
+					log_string = 'OBJECT: '+tempObj.phase+':'+tempObj.webpage+':'+str(len(tempObj.content))
+					logger_1.info(log_string)
+					
 					PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers,
 											    tempObj.url,
 											    tempObj.content,
@@ -207,8 +212,9 @@ def process_FromInternet(number):
 												False, 
 												tempObj.webpage) )
 			else:
-				pass
 				#but still we can send this to edge cache
+				log_string = 'OBJECT: '+tempObj.phase+':'+tempObj.webpage+':'+str(len(tempObj.content))
+				logger_1.info(log_string)
 				PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers,
 																	tempObj.url,
 																	tempObj.content,
@@ -257,7 +263,7 @@ def calculateDiff(new , old):
 	patch_list = var.patch_make(old_content, new_content, diff)
 	patch_text = var.patch_toText(patch_list)  # calculate diff
 	#make EdgeCacheObject with content being diff and diff variable as True
-	log_string = 'OBJECT_DIFF:'+new.webpage+':'+str(len(old_content)) +' :'+ str(len(patch_text))
+	log_string = 'OBJECT_DIFF:'+new.phase+':'+new.webpage+':'+str(len(old_content)) +' :'+ str(len(patch_text))
 	logger_1.info(log_string)
 	# to keep track of deltas
 	old.delta.append( len(patch_text)*8 )
@@ -281,13 +287,7 @@ def sendToEdgeCache(number):
 
 	while True:
 		if len(PUSH_TO_EDGE_CACHE) > 0:
-			#print 'Sending Object  '
 			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
-
-			if not edgeObject.diff:
-				log_string = 'OBJECT: '+edgeObject.webpage+':'+str(len(edgeObject.content))
-				logger_1.info(log_string)
-
 			MESSAGE = cPickle.dumps(edgeObject)
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect((EdgeCache_IP, EdgeCache_PORT))

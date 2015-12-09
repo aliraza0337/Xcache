@@ -194,9 +194,10 @@ class ProxyHandler(BaseHTTPRequestHandler):
 		req = '%s %s %s\r\n' % (self.command, self.path, self.request_version)
 		# Add headers to the request
 		webpage = ' '
+		phase = ' '
 		if 'webpage' in self.headers:
-			webpage =  self.headers['webpage']
-
+			phase = self.headers['webpage'].split(':')[0]
+			webpage = self.headers['webpage'][2:]
 
 		req += '%s\r\n' % self.headers
 		# Append message body if present to the request
@@ -219,7 +220,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
 			res += content_received
 
 			try:
-				HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, webpage, self.rtt) # TODO replace the 100 with RTT
+				HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, webpage, phase, self.rtt) # TODO replace the 100 with RTT
 				controller.createObject(HTTPObject_received)
 			except Exception,e: 
 				print str(e)
