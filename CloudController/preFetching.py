@@ -250,6 +250,7 @@ def calculateUtilities():
 		#print log_string
 		logger_1.info(log_string)
 		logger_2.info(log_string)
+		t = 1/t
 		PREFETCHING_QUEUE.put((t, webpage))
 	return PREFETCHING_QUEUE
 
