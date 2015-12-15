@@ -288,10 +288,14 @@ def sendToEdgeCache(number):
 	while True:
 		if len(PUSH_TO_EDGE_CACHE) > 0:
 			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
+			print edgeObject.webpage  + str(len(PUSH_TO_EDGE_CACHE))
 			MESSAGE = cPickle.dumps(edgeObject)
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			s.connect((EdgeCache_IP, EdgeCache_PORT))
-			s.sendall(MESSAGE)
-			s.close()
-			del s
-		time.sleep(0.010)
+			try:
+				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				s.connect((EdgeCache_IP, EdgeCache_PORT))
+				s.sendall(MESSAGE)
+				s.close()
+				del s
+			except:
+				pass
+		#time.sleep(0.001)
