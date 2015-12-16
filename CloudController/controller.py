@@ -284,18 +284,19 @@ def sendToEdgeCache(number):
 	global PUSH_TO_EDGE_CACHE
 	EdgeCache_IP = constants.EDGECACHE_IP # '195.229.110.139'
 	EdgeCache_PORT = constants.EDGECACHE_PORT_OBJECTS
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.connect((EdgeCache_IP, EdgeCache_PORT))
 
 	while True:
+		
 		if len(PUSH_TO_EDGE_CACHE) > 0:
+			
 			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
-			print edgeObject.webpage  + str(len(PUSH_TO_EDGE_CACHE))
 			MESSAGE = cPickle.dumps(edgeObject)
 			try:
-				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				s.connect((EdgeCache_IP, EdgeCache_PORT))
 				s.sendall(MESSAGE)
-				s.close()
-				del s
+				s.sendall('###EDGE-OBJECT###')
 			except:
-				pass
+				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				s.connect((EdgeCache_IP, EdgeCache_PORT))	
 		#time.sleep(0.001)
