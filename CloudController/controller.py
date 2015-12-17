@@ -292,10 +292,13 @@ def sendToEdgeCache(number):
 		if len(PUSH_TO_EDGE_CACHE) > 0:
 			
 			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
+			print edgeObject.url
 			MESSAGE = cPickle.dumps(edgeObject)
 			try:
+				#print MESSAGE
+				#print '---------'
 				s.sendall(MESSAGE)
-				s.sendall('###EDGE-OBJECT###')
+				s.sendall('EDGEALIRAZAOBJECT')
 			except:
 				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 				s.connect((EdgeCache_IP, EdgeCache_PORT))	
