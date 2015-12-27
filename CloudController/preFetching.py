@@ -20,7 +20,7 @@ logger_1.setLevel(logging.INFO)
 hdlr_1 = logging.FileHandler('prefetching.log')
 logger_1.addHandler(hdlr_1)
 
-logger_2 = logging.getLogger('simple_logger_2')
+logger_2 = logging.getLogger('simple_logger')
 logger_2.setLevel(logging.INFO)
 hdlr_2 = logging.FileHandler('utilitycalculation.log')
 logger_2.addHandler(hdlr_2)
@@ -29,8 +29,11 @@ logger_2.addHandler(hdlr_2)
 PREFETCHING_LIST = []
 PREFETCHING_QUEUE = Q.PriorityQueue()
 
+
 MAX_BOOTSTRAP  = constants.MAX_BOOTSTRAP
 BOOTSTRAPSITES  = {}
+BOOTSTRAPSITES_COUNTER = 0 
+PREFETCHING_COUNTER = 0 
 ALL_WEBSITES = {}
 TIME =  constants.INTERVAL_PREFETCHING
 
@@ -43,6 +46,10 @@ def startPrefetching(num):
 
 
 def openPage (webpage, check):
+
+	global BOOTSTRAPSITES_COUNTER, PREFETCHING_COUNTER
+	display = Display(visible=0, size=(1920,1080))
+	display.start()
 
 	myProxy = "127.0.0.1:9999"
 	proxy = Proxy ({
@@ -77,94 +84,112 @@ def openPage (webpage, check):
 	profile.set_preference('modifyheaders.config.active', True)
 	profile.set_preference('modifyheaders.config.alwaysOn', True)
 	#
-
 	profile.update_preferences()
-
 	browser = webdriver.Firefox(firefox_profile=profile, firefox_binary=binary, proxy=proxy)
-	browser.implicitly_wait(30)
-	browser.set_page_load_timeout(100)
+	browser.set_page_load_timeout(70)
 	browser.set_window_size(1920, 1080)
+	
+	try:
+		browser.get(webpage)
+		print "-- Finished loading ", browser.title
+	except:
+		print "-- Problem loading "
+		display.stop()
+		if check =='b':
+			BOOTSTRAPSITES_COUNTER -= 1
+		else:
+			PREFETCHING_COUNTER -= 1
+		return
 
-	browser.get (webpage)
-
-	while browser.title == "Problem loading page":
-		browser.get (webpage)
-		time.sleep(0.001)
 
 	del profile
-	print "-- Finished loading ", browser.title
 	browser.quit()
 	del browser
+	
+	if check =='b':
+		BOOTSTRAPSITES_COUNTER -= 1
+	else:
+		PREFETCHING_COUNTER -= 1
+	
+	display.stop()
 
 
 
 def bootstrap(a):
-	global BOOTSTRAPSITES
-	print "Bootstraping thread started\n"
+
+	global BOOTSTRAPSITES, BOOTSTRAPSITES_COUNTER
+	print "Bootstraping Thread ...\n"
 
 	while True:
+
 		if len (BOOTSTRAPSITES ) > 0:
 
-			for item in BOOTSTRAPSITES.keys() :
+			for item in BOOTSTRAPSITES.keys():
 
-				if BOOTSTRAPSITES [item][1] <= time.time():
-					display = Display(visible=0, size=(1920,1080))
-					display.start()
+				if BOOTSTRAPSITES_COUNTER < 5:
+					if BOOTSTRAPSITES [item][1] <= time.time():						
+						print ('BOOTSTRAP: ', item, 'FOR: ',BOOTSTRAPSITES[item][0] )
+						log_string = 'BOOTSTRAP: '+str(time.time()) +' :'+item
+						logger_1.info(log_string)
+						
+						try:
+							BOOTSTRAPSITES_COUNTER +=1
+							thread.start_new_thread( openPage, (item, 'b', ))
+						except:
+							pass
 
-					print ('Bootstraping: ', item, 'for: ',BOOTSTRAPSITES[item][0] )
+						BOOTSTRAPSITES [item][0]-=1
+						BOOTSTRAPSITES [item][1]=time.time()+constants.INTERVAL_BOOTSTRAP
+						print BOOTSTRAPSITES [item][1]
+						
+						if BOOTSTRAPSITES [item][0] <=0 :
+							print 'ADDES TO PREFETCHING_LIST'
+							log_string = 'BOOTSTRAP: ADDED_TO_PREFETCHING_LIST: '+item
+							logger_1.info(log_string)
+							PREFETCHING_LIST.append(item)
+							del BOOTSTRAPSITES[item]
 
-					log_string = 'BOOTSTRAP: '+str(time.time()) +' :'+item
-					logger_1.info(log_string)
-					try:
-						openPage(item, 'b')
-					except:
-						pass
-					BOOTSTRAPSITES [item][0]-=1
-					BOOTSTRAPSITES [item][1]=time.time()+constants.INTERVAL_BOOTSTRAP
-					print BOOTSTRAPSITES [item][1]
-					if BOOTSTRAPSITES [item][0] <=0 :
-						print 'Added to PREFETCHING_LIST'
-						log_string = 'BOOTSTRAP: ADDED_TO_PREFETCHING_LIST: '+item
-						logging.info(log_string)
-						PREFETCHING_LIST.append(item)
+				while BOOTSTRAPSITES_COUNTER >=5:
+					time.sleep(1)
 
-						del BOOTSTRAPSITES[item]
-					display.stop()
 
-		time.sleep(1)
+
+
+
 
 
 def sitesPrefetching (number):
 	PREFETCHING_BOOL = False
+	
 	while True:
-		global PREFETCHING_QUEUE , TIME, PREFETCHING_LIST
+
+		global PREFETCHING_QUEUE , TIME, PREFETCHING_LIST, PREFETCHING_COUNTER
 		startTime = time.time()
+
 		if len(PREFETCHING_LIST) > 0:
 			PREFETCHING_QUEUE = calculateUtilities()
-			print PREFETCHING_QUEUE
 
 		while not PREFETCHING_QUEUE.empty():
 			PREFETCHING_BOOL = True
-
 			w = PREFETCHING_QUEUE.get()
-			display = Display(visible=0, size=(1920,1080))
-			display.start()
-
 			log_string = 'PREFETCHING: '+str(time.time()) +' :'+w[1]
 			print log_string
 			logger_1.info(log_string)
 			try:
-				openPage(w[1] , 'p')
+				PREFETCHING_COUNTER +=1
+				thread.start_new_thread(openPage, (w[1] , 'p', ))
 			except:
 				pass
-			display.stop()
+
+			while PREFETCHING_COUNTER >=5:
+				time.sleep(1)
 
 			if time.time() - startTime >= TIME:
 				break # we have reached the end of the slot for prefetching we should stop and start the next slot
 
 		if PREFETCHING_BOOL:
 			if time.time() - startTime < TIME:
-				print 'going to sleep:' + str(TIME) +' '+str(time.time() - startTime)
+				print 'Going to sleep:' + str(TIME) +' '+str(time.time() - startTime)
 				time.sleep(TIME - (time.time() - startTime))
 
 
@@ -197,14 +222,13 @@ def receiveLogs(num):
 			else:
 				BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
 				ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
-
 				log_string = 'ADDED FROM LOGS: '+siteInfo[0]
 				logger_1.info(log_string)
 
 	return
 
 
-	# tmp = [ ('http://www.cnn.com/', 10)]
+	# tmp = [ ('http://www.cnn.com/', 10), ('http://www.bbc.com/', 10), ('http://www.yahoo.com/', 10), ('http://www.apple.com/', 10), ('http://www.souq.com/', 10),('http://www.faiza.com/', 10), ('http://www.ebay.com/', 10) ]
 	
 	# for siteInfo in tmp:
 	# 	if siteInfo[0] in ALL_WEBSITES:
@@ -224,7 +248,7 @@ def calculateUtilities():
 	global ALL_WEBSITES, PREFETCHING_QUEUE, PREFETCHING_LIST
 	PREFETCHING_QUEUE =  Q.PriorityQueue()
 	for webpage in PREFETCHING_LIST:
-		print 'calculateUtilities'
+		print 'Calculating-Utilities ...'
 		n_t = float(0.000)
 		d_t = float(0.000)
 		n_b = float(0.000)
@@ -233,7 +257,6 @@ def calculateUtilities():
 		logger_2.info('Utility Calculation: ' + webpage)
 		for o in webPageObjects.keys():
 			x1, x2, x3, x4, st = webPageObjects[o].calculateUtilities()
-			print st
 			n_t = n_t + x1
 			d_t = d_t + x2
 			n_b = n_b + x3
@@ -247,7 +270,6 @@ def calculateUtilities():
 
 		t = float(float(n_t/d_t) + float(n_b/d_b))
 		log_string = 'UTILITY: '+webpage +' :TIME= '+str( n_t/float(d_t) )+':BW='+str( n_b/float(d_b))
-		#print log_string
 		logger_1.info(log_string)
 		logger_2.info(log_string)
 		if t != 0:

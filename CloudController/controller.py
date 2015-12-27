@@ -23,16 +23,17 @@ PUSH_TO_EDGE_CACHE = []
 BW = constants.BW
 
 
-logger_1 = logging.getLogger('simple_logger_3')
-logger_1.setLevel(logging.INFO)
-hdlr_1 = logging.FileHandler('objectsanddiffs.log')
-logger_1.addHandler(hdlr_1)
+logger_3 = logging.getLogger('simple_logger_3')
+logger_3.setLevel(logging.INFO)
+hdlr_3 = logging.FileHandler('objectsanddiffs.log')
+logger_3.addHandler(hdlr_3)
+
 
 
 
 def startController():
 	thread.start_new_thread( process_FromInternet, (1,))
-	thread.start_new_thread( sendToEdgeCache, (1,))
+	#thread.start_new_thread( sendToEdgeCache, (1,))
 
 def createObject(objectReceived):
 	FROM_INTERNET.append(objectReceived)
@@ -201,7 +202,7 @@ def process_FromInternet(number):
 					ALL_WEBSITES[tempObj.webpage].objects[tempObj.url]=tempObj
 
 					log_string = 'OBJECT: '+tempObj.phase+':'+tempObj.webpage+':'+str(len(tempObj.content))
-					logger_1.info(log_string)
+					logger_3.info(log_string)
 					
 					PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers,
 											    tempObj.url,
@@ -214,7 +215,7 @@ def process_FromInternet(number):
 			else:
 				#but still we can send this to edge cache
 				log_string = 'OBJECT: '+tempObj.phase+':'+tempObj.webpage+':'+str(len(tempObj.content))
-				logger_1.info(log_string)
+				logger_3.info(log_string)
 				PUSH_TO_EDGE_CACHE.append(edgeCacheObject.EdgeObject(tempObj.headers,
 																	tempObj.url,
 																	tempObj.content,
@@ -232,7 +233,7 @@ def processObject(currentObject, previousObject):
 			object_to_send = calculateDiff(currentObject, previousObject) # calculate Diff
 			
 		except:
-			logger_1.info('Could not calculate diff -- ' + currentObject.url)
+			logger_3.info('Could not calculate diff -- ' + currentObject.url)
 			return
 			pass
 	else:
@@ -264,7 +265,7 @@ def calculateDiff(new , old):
 	patch_text = var.patch_toText(patch_list)  # calculate diff
 	#make EdgeCacheObject with content being diff and diff variable as True
 	log_string = 'OBJECT_DIFF:'+new.phase+':'+new.webpage+':'+str(len(old_content)) +' :'+ str(len(patch_text))
-	logger_1.info(log_string)
+	logger_3.info(log_string)
 	# to keep track of deltas
 	old.delta.append( len(patch_text)*8 )
 	newO = edgeCacheObject.EdgeObject(	new.headers,
