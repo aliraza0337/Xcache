@@ -131,9 +131,9 @@ def bootstrap(a):
 						print ('BOOTSTRAP: ', item, 'FOR: ',BOOTSTRAPSITES[item][0] )
 						log_string = 'BOOTSTRAP: '+str(time.time()) +' :'+item
 						logger_1.info(log_string)
-						
+						BOOTSTRAPSITES_COUNTER +=1
+	
 						try:
-							BOOTSTRAPSITES_COUNTER +=1
 							thread.start_new_thread( openPage, (item, 'b', ))
 						except:
 							pass
