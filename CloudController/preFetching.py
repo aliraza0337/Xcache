@@ -48,70 +48,78 @@ def startPrefetching(num):
 def openPage (webpage, check):
 
 	global BOOTSTRAPSITES_COUNTER, PREFETCHING_COUNTER
-	display = Display(visible=0, size=(1920,1080))
-	display.start()
-
-	myProxy = "127.0.0.1:9999"
-	proxy = Proxy ({
-		'proxyType':ProxyType.MANUAL,
-		'httpProxy': myProxy,
-		'ftpProxy': myProxy,
-		'sslProxy': '',
-		'noProxy': ''
-		})
-
-	binary = fwb.FirefoxBinary(firefox_path='/usr/bin/firefox')
-	profile = webdriver.FirefoxProfile()
-	profile.set_preference('datareporting.healthreport.uploadEnabled', False)
-	profile.set_preference('datareporting.healthreport.service.enabled', False)
-	profile.set_preference('datareporting.healthreport.service.firstRun', False)
-	profile.set_preference('app.update.auto', False)
-	profile.set_preference('app.update.enabled', False)
-	profile.set_preference('browser.cache.disk.enable', False)
-	profile.set_preference('browser.cache.memory.enable', False)
-	profile.set_preference('browser.cache.offline.enable', False)
-	profile.set_preference('network.http.use-cache', False)
-	profile.set_preference('network.dns.disablePrefetch', True)
-	profile.set_preference('network.http.accept-encoding', '')
-
-	#for modifying header
-	profile.add_extension( 'modify_headers-0.7.1.1-fx.xpi')
-	profile.set_preference('modifyheaders.headers.count', 1)
-	profile.set_preference('modifyheaders.headers.action0', "Add")
-	profile.set_preference('modifyheaders.headers.name0', 'webpage')
-	profile.set_preference('modifyheaders.headers.value0', check+':'+webpage)
-	profile.set_preference('modifyheaders.headers.enabled0', True)
-	profile.set_preference('modifyheaders.config.active', True)
-	profile.set_preference('modifyheaders.config.alwaysOn', True)
-	#
-	profile.update_preferences()
-	browser = webdriver.Firefox(firefox_profile=profile, firefox_binary=binary, proxy=proxy)
-	browser.set_page_load_timeout(70)
-	browser.set_window_size(1920, 1080)
-	
 	try:
-		browser.get(webpage)
-		print "-- Finished loading ", browser.title
-	except:
-		print "-- Problem loading "
-		display.stop()
+		display = Display(visible=0, size=(1920,1080))
+		display.start()
+		myProxy = "127.0.0.1:9999"
+		proxy = Proxy ({
+			'proxyType':ProxyType.MANUAL,
+			'httpProxy': myProxy,
+			'ftpProxy': myProxy,
+			'sslProxy': '',
+			'noProxy': ''
+			})
+
+		binary = fwb.FirefoxBinary(firefox_path='/usr/bin/firefox')
+		profile = webdriver.FirefoxProfile()
+		profile.set_preference('datareporting.healthreport.uploadEnabled', False)
+		profile.set_preference('datareporting.healthreport.service.enabled', False)
+		profile.set_preference('datareporting.healthreport.service.firstRun', False)
+		profile.set_preference('app.update.auto', False)
+		profile.set_preference('app.update.enabled', False)
+		profile.set_preference('browser.cache.disk.enable', False)
+		profile.set_preference('browser.cache.memory.enable', False)
+		profile.set_preference('browser.cache.offline.enable', False)
+		profile.set_preference('network.http.use-cache', False)
+		profile.set_preference('network.dns.disablePrefetch', True)
+		profile.set_preference('network.http.accept-encoding', '')
+
+		#for modifying header
+		profile.add_extension( 'modify_headers-0.7.1.1-fx.xpi')
+		profile.set_preference('modifyheaders.headers.count', 1)
+		profile.set_preference('modifyheaders.headers.action0', "Add")
+		profile.set_preference('modifyheaders.headers.name0', 'webpage')
+		profile.set_preference('modifyheaders.headers.value0', check+':'+webpage)
+		profile.set_preference('modifyheaders.headers.enabled0', True)
+		profile.set_preference('modifyheaders.config.active', True)
+		profile.set_preference('modifyheaders.config.alwaysOn', True)
+		#
+		profile.update_preferences()
+		browser = webdriver.Firefox(firefox_profile=profile, firefox_binary=binary, proxy=proxy)
+		browser.set_page_load_timeout(70)
+		browser.set_window_size(1920, 1080)
+		
+		try:
+			browser.get(webpage)
+			print "-- Finished loading ", browser.title
+		except:
+			print "-- Problem loading "
+			display.stop()
+			if check =='b':
+				BOOTSTRAPSITES_COUNTER -= 1
+			else:
+				PREFETCHING_COUNTER -= 1
+			return
+
+
+		del profile
+		browser.quit()
+		del browser
+		
 		if check =='b':
 			BOOTSTRAPSITES_COUNTER -= 1
 		else:
 			PREFETCHING_COUNTER -= 1
-		return
-
-
-	del profile
-	browser.quit()
-	del browser
+		
+		display.stop()
 	
-	if check =='b':
-		BOOTSTRAPSITES_COUNTER -= 1
-	else:
-		PREFETCHING_COUNTER -= 1
-	
-	display.stop()
+	except:
+
+		if check =='b':
+			BOOTSTRAPSITES_COUNTER -= 1
+		else:
+			PREFETCHING_COUNTER -= 1
+		return 
 
 
 
@@ -126,7 +134,8 @@ def bootstrap(a):
 
 			for item in BOOTSTRAPSITES.keys():
 
-				if BOOTSTRAPSITES_COUNTER < 5:
+				if BOOTSTRAPSITES_COUNTER < 6:
+					
 					if BOOTSTRAPSITES [item][1] <= time.time():						
 						print ('BOOTSTRAP: ', item, 'FOR: ',BOOTSTRAPSITES[item][0] )
 						log_string = 'BOOTSTRAP: '+str(time.time()) +' :'+item
