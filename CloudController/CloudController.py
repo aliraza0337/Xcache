@@ -19,6 +19,18 @@ from OpenSSL.crypto import (X509Extension, X509, dump_privatekey, dump_certifica
 							PKey, TYPE_RSA, X509Req)
 from OpenSSL.SSL import FILETYPE_PEM
 
+import logging 
+
+logger_4 = logging.getLogger('simple_logger_4')
+logger_4.setLevel(logging.INFO)
+hdlr_4 = logging.FileHandler('contentFromInternet.log')
+logger_4.addHandler(hdlr_4)
+
+
+
+
+
+
 class CertificateAuthority(object):
 
 	def __init__(self, ca_file='ca.pem', cache_dir=gettempdir()):
@@ -218,6 +230,9 @@ class ProxyHandler(BaseHTTPRequestHandler):
 			res += '%s\r\n' % h.msg
 			content_received = h.read()
 			res += content_received
+			
+			#log the size 
+			logger_4.info('OBJECT : ' + str(len(res)) )
 
 			try:
 				HTTPObject_received = controller.HTTPObject(h.getheaders(), url_requested , content_received, h.status, h.reason, self.request_version, webpage, phase, self.rtt) # TODO replace the 100 with RTT
