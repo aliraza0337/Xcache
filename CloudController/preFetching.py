@@ -95,6 +95,9 @@ def openPage (webpage, check):
 		except:
 			print "-- Problem loading "
 			display.stop()
+	   		del profile
+                	browser.quit()
+                	del browser
 			if check =='b':
 				BOOTSTRAPSITES_COUNTER -= 1
 			else:
