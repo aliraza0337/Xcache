@@ -96,8 +96,9 @@ def openPage (webpage, check):
 			print "-- Problem loading "
 			display.stop()
 	   		del profile
-                	browser.quit()
-                	del browser
+	   		browser.quit()
+	   		del browser
+			
 			if check =='b':
 				BOOTSTRAPSITES_COUNTER -= 1
 			else:
@@ -284,9 +285,9 @@ def calculateUtilities():
 		log_string = 'UTILITY: '+webpage +' :TIME= '+str( n_t/float(d_t) )+':BW='+str( n_b/float(d_b))
 		logger_1.info(log_string)
 		logger_2.info(log_string)
-		if t != 0:
+		if t > 1:
 			t = 1/t
-
+			
 		PREFETCHING_QUEUE.put((t, webpage))
 	return PREFETCHING_QUEUE
 
