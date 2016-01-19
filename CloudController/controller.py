@@ -168,8 +168,8 @@ class HTTPObject:
 			timeBased = (p*delta_value)/float(BW)
 			bandwidthBased = p*delta_value
 		else:
-			timeBased = n_t
-			bandwidthBased = n_b
+			timeBased = N_req * q * (self.RTT + p*( self.size/float(BW) ) )
+			bandwidthBased = N_req*q*p*self.size
 
 		logstring = ('n_req, q, rtt, p, size, delta', N_req, q, self.RTT, p , self.size, delta_value, x1orx2)
 		return n_t, timeBased, n_b, bandwidthBased , logstring
