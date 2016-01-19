@@ -177,11 +177,11 @@ def sitesPrefetching (number):
 	while True:
 
 		global PREFETCHING_QUEUE , TIME, PREFETCHING_LIST, PREFETCHING_COUNTER
-		startTime = time.time()
+		
 
 		if len(PREFETCHING_LIST) > 0:
 			PREFETCHING_QUEUE = calculateUtilities()
-
+		startTime = time.time()
 		while not PREFETCHING_QUEUE.empty():
 			PREFETCHING_BOOL = True
 			w = PREFETCHING_QUEUE.get()
@@ -285,10 +285,9 @@ def calculateUtilities():
 		log_string = 'UTILITY: '+webpage +' :TIME= '+str( n_t/float(d_t) )+':BW='+str( n_b/float(d_b))
 		logger_1.info(log_string)
 		logger_2.info(log_string)
-		if t > 1:
-			t = 1/t
-			
-		PREFETCHING_QUEUE.put((t, webpage))
+		if t >= 1:
+			t = 1/t	
+			PREFETCHING_QUEUE.put((t, webpage))
 	return PREFETCHING_QUEUE
 
 

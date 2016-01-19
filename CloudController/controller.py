@@ -159,7 +159,7 @@ class HTTPObject:
 		else:	
 			delta_value = sum(self.delta)/float(len(self.delta))
 
-		n_t = N_req * q * (self.RTT + p*( self.size/float(BW) ) )
+		n_t = N_req*q*(self.RTT + p*( self.size/float(BW)))
 		n_b = N_req*q*p*self.size
 		x1orx2 = 'x2'
 		
