@@ -191,7 +191,10 @@ def process_FromInternet(number):
 					if tempObj.hash != ALL_WEBSITES[tempObj.webpage].objects[tempObj.url].hash:
 						#print 'Object Changed'
 					# the hash of the object has changed, we need to update the object
-						processObject(tempObj, ALL_WEBSITES[tempObj.webpage].objects[tempObj.url])
+						try:
+							processObject(tempObj, ALL_WEBSITES[tempObj.webpage].objects[tempObj.url])
+						except:
+							pass
 					else:
 						del tempObj
 						# the object has not changed nothing to be done, we delete this object
@@ -211,7 +214,8 @@ def process_FromInternet(number):
 												tempObj.reason,
 												tempObj.request_ver,
 												False, 
-												tempObj.webpage) )
+												tempObj.webpage, 
+												tempObj.canApplyDiff) )
 			else:
 				#but still we can send this to edge cache
 				log_string = 'OBJECT: '+tempObj.phase+':'+tempObj.webpage+':'+str(len(tempObj.content))
@@ -223,7 +227,8 @@ def process_FromInternet(number):
 																	tempObj.reason,
 																	tempObj.request_ver,
 																	False, 
-																	tempObj.webpage) )
+																	tempObj.webpage, 
+																	tempObj.canApplyDiff) )
 
 def processObject(currentObject, previousObject):
 	currentTime = time.time()
@@ -244,7 +249,8 @@ def processObject(currentObject, previousObject):
 													currentObject.reason,
 													currentObject.request_ver,
 													False, 
-													currentObject.webpage)
+													currentObject.webpage, 
+													currentObject.canApplyDiff)
 	PUSH_TO_EDGE_CACHE.append(object_to_send)
 	previousObject.addTimeStamp(currentTime)
 	previousObject.copyObject(currentObject)
@@ -275,7 +281,8 @@ def calculateDiff(new , old):
 										new.reason,
 										new.request_ver,
 										True,
-										new.webpage)
+										new.webpage, 
+										new.canApplyDiff)
 	return newO
 
 

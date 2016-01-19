@@ -15,14 +15,14 @@ ALL_WEBSITES = []
 
 def openPage (webpage):
 
-	myProxy = "10.230.240.204:60001"
-	proxy = Proxy ({
-		'proxyType':ProxyType.MANUAL,
-		'httpProxy': myProxy,
-		'ftpProxy': '',
-		'sslProxy': '',
-		'noProxy': ''
-		})
+	#myProxy = "10.230.240.204:60001"
+	#proxy = Proxy ({
+	#	'proxyType':ProxyType.MANUAL,
+	#	'httpProxy': myProxy,
+	#	'ftpProxy': '',
+	#	'sslProxy': '',
+	#	'noProxy': ''
+	#	})
 
 	binary = fwb.FirefoxBinary(firefox_path='/usr/bin/firefox')
 	profile = webdriver.FirefoxProfile()
@@ -51,7 +51,7 @@ def openPage (webpage):
 
 	profile.update_preferences()
 
-	browser = webdriver.Firefox(firefox_profile=profile, firefox_binary=binary, proxy=proxy)
+	browser = webdriver.Firefox(firefox_profile=profile, firefox_binary=binary)
 	browser.implicitly_wait(50)
 	browser.set_page_load_timeout(100)
 	browser.set_window_size(1920, 1080)
@@ -63,8 +63,8 @@ def openPage (webpage):
 		time.sleep(0.001)
 
 	del profile
-	#print "-- Finished loading ", browser.title
-	browser.quit()
+	print "-- Finished loading ", browser.title
+	#browser.quit()
 	del browser
 
 

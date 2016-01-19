@@ -177,11 +177,11 @@ def sitesPrefetching (number):
 	while True:
 
 		global PREFETCHING_QUEUE , TIME, PREFETCHING_LIST, PREFETCHING_COUNTER
-		startTime = time.time()
 
 		if len(PREFETCHING_LIST) > 0:
 			PREFETCHING_QUEUE = calculateUtilities()
 
+		startTime = time.time()
 		while not PREFETCHING_QUEUE.empty():
 			PREFETCHING_BOOL = True
 			w = PREFETCHING_QUEUE.get()
@@ -241,16 +241,16 @@ def receiveLogs(num):
 	return
 
 
-	# tmp = [ ('http://www.cnn.com/', 10), ('http://www.bbc.com/', 10), ('http://www.yahoo.com/', 10), ('http://www.apple.com/', 10), ('http://www.souq.com/', 10),('http://www.faiza.com/', 10), ('http://www.ebay.com/', 10) ]
+#	tmp = [ ('http://www.cnn.com/', 10), ('http://www.bbc.com/', 10), ('http://www.yahoo.com/', 10), ('http://www.apple.com/', 10), ('http://www.souq.com/', 10),('http://www.faiza.com/', 10), ('http://www.ebay.com/', 10) ]
 	
-	# for siteInfo in tmp:
-	# 	if siteInfo[0] in ALL_WEBSITES:
-	# 		ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
-	# 	else:
-	# 		BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
-	# 		ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
-	# 		log_string = 'ADDED FROM LOGS: '+siteInfo[0]
-	# 		logger_1.info(log_string)
+#	for siteInfo in tmp:
+#	 	if siteInfo[0] in ALL_WEBSITES:
+#	 		ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
+#	 	else:
+#	 		BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
+#	 		ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
+#	 		log_string = 'ADDED FROM LOGS: '+siteInfo[0]
+#	 		logger_1.info(log_string)
 
 
 
@@ -286,9 +286,8 @@ def calculateUtilities():
 		logger_1.info(log_string)
 		logger_2.info(log_string)
 		if t > 1:
-			t = 1/t
-			
-		PREFETCHING_QUEUE.put((t, webpage))
+			t = 1/t		
+			PREFETCHING_QUEUE.put((t, webpage))
 	return PREFETCHING_QUEUE
 
 
