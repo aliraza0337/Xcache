@@ -309,17 +309,17 @@ def sendToEdgeCache(number):
 			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 			s.bind((EdgeCache_IP, EdgeCache_Port))
 			s.listen(1)
-			
-		except Exception,e::
+			conn, addr  = s.accept()
+		except Exception,e:
 			logger_4.info(str(e))
 			time.sleep(30)
 			continue
 		
-		conn, addr  = s.accept()
+		
 		logger_4.info('CONNECT TO EC ... ')
 		start_time = time.time()
 		while 1:
-
+			print 'ready to send objects'
 			if len(PUSH_TO_EDGE_CACHE) > 0:
 				start_time = time.time()
 				edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
