@@ -38,30 +38,34 @@ def listenFromController(num):
 
 	EdgeCache_IP = constants.EDGECACHE_IP
 	EdgeCache_Port = constants.EDGECACHE_PORT_OBJECTS
-	while 1:
-
-		while 1:
+	while True:
+		while True:
 			try:
 				logger_1.info('connecting to CC\n')
 				s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
+				s.settimeout(100)
 				s.connect((EdgeCache_IP, EdgeCache_Port))
-				logger_1.info('connected...\n')
+				
 			except:
 				time.sleep(30)
-
-
+				
+		logger_1.info('connected...\n')
 		MESSAGE = ''
-		while 1:
-			data = s.recv(1024)
-			MESSAGE += data
-				if '**EDGE_OBJECT**' in MESSAGE: 
-					try:
-						edgeObject = cPickle.loads(MESSAGE.split('**EDGE_OBJECT**')[0])
-						ALL_OBJECTS.append(edgeObject)
-					except:
-						pass
-					MESSAGE = MESSAGE.split('**EDGE_OBJECT**')[1]
-
+		while True:
+			try:
+				data = s.recv(1024)
+				MESSAGE += data
+					if '**EDGE_OBJECT**' in MESSAGE: 
+						if MESSAGE.split('**EDGE_OBJECT**')[0] != 'Alive':
+							try:
+								edgeObject = cPickle.loads(MESSAGE.split('**EDGE_OBJECT**')[0])
+								ALL_OBJECTS.append(edgeObject)
+							except:
+								pass
+						MESSAGE = MESSAGE.split('**EDGE_OBJECT**')[1]
+			except Exception, e:
+				logger_1.info(str(e))
+				break
 
 
 
