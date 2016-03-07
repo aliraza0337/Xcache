@@ -10,7 +10,6 @@ import reportLogs
 import edgeCacheObject 
 import constants 
 import logging 
-
 global ALL_OBJECTS , PUSH_TO_CACHE, PREVIOUS_OBJECTS 
 
 logger_1 = logging.getLogger('simple_logger')
@@ -22,6 +21,8 @@ logger_1.addHandler(hdlr_1)
 ALL_OBJECTS = [] 
 PUSH_TO_CACHE = []
 PREVIOUS_OBJECTS = {}
+
+
 
 
 def startfunc():	
@@ -64,13 +65,12 @@ def listenFromController(num):
 
 
 
-
-
-
 def push_in_cache(edgeObject, mode):
 	res = '%s %s %s\r\n' % (edgeObject.request_ver, edgeObject.status, edgeObject.reason)
 	N = 15 
+	second = datetime.datetime.now().minute
 	file_name = ''.join(random.choice(stringRandom.ascii_uppercase + stringRandom.digits) for _ in range(N))
+	file_name = str(second) + file_name 	
 	print 'ready to push    :'+ file_name
 
 	for header in edgeObject.headers:
@@ -83,11 +83,10 @@ def push_in_cache(edgeObject, mode):
 
 	path = 'cache/'+file_name+'.txt'
 	command = 'sudo ./tspush -f cache/'+file_name+'.txt -u http://'+constants.APS_IP_PORT+' -s '+edgeObject.url
-	#print command
 	os.system(command)
-	time.sleep(0.08)
-	os.system('rm '+path)
-
+	os.system('rm '+'cache/'+str(second-1)+'*')
+	if not edgeObject.canApplyDiff:
+		del edgeObject
 
 def applyDiff(obj):
 
@@ -97,6 +96,7 @@ def applyDiff(obj):
 		newObject = PREVIOUS_OBJECTS[obj.url]
 	else: 
 		print 'Object not found!'
+		return 
 
 	old_content = newObject.content.decode('utf-8')
 	diff = obj.content 
@@ -112,7 +112,10 @@ def applyDiff(obj):
 	newObject.reason = obj.reason
 
 	del obj
-	push_in_cache(newObject, 'diff')
+	try:
+		push_in_cache(newObject, 'diff')
+	except:
+		pass
 
 
 
@@ -122,12 +125,21 @@ def processObjects(num):
 		if len(ALL_OBJECTS) > 0:
 			edgeObject = ALL_OBJECTS.pop(0)
 			
-			if not edgeObject.diff:			
-				push_in_cache(edgeObject, 'normal')
+			if not edgeObject.diff:
+				try:	
+					push_in_cache(edgeObject, 'normal')
+				except:
+					pass
 				PREVIOUS_OBJECTS[edgeObject.url] = edgeObject
-			else:
-				applyDiff(edgeObject)
+			else:	
+				try:
+					applyDiff(edgeObject)
+				except:
+					pass
 			time.sleep(0.001)
 		time.sleep(0.001)
 
 startfunc()
+
+
+

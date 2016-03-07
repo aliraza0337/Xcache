@@ -15,6 +15,9 @@ def getLogs(previous):
 	logsDir = constants.LOG_DIR
 	allFiles = glob.glob(logsDir)
 	sorted_allFiles =  sorted(allFiles)
+	if len(sorted_allFiles)< 1:
+		return [], " "
+
 	one = sorted_allFiles[-1]
 	print one 
 	if one == previous:
@@ -68,15 +71,16 @@ def sendToController(websites):
 def startFunc(num):
 	print 'Sending Logs!'
 	previous = " "
-	#websites, previous = getLogs(previous)
-	#print websites
 	time.sleep(100)
 	while 1:
-		websites, previous = getLogs(previous)
-		#print websites
-		#break
-		if len(websites) > 0:
-			sendToController(websites)
-		time.sleep(1800)
-
-#startFunc(1)
+		try:
+			websites, previous = getLogs(previous)
+			print websites
+			if len(websites) > 0:
+				try:
+					sendToController(websites)
+				except:
+					pass
+			time.sleep(1800)
+		except:
+			pass

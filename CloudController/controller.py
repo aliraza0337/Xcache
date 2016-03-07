@@ -29,6 +29,12 @@ logger_3.setLevel(logging.INFO)
 hdlr_3 = logging.FileHandler('objectsanddiffs.log')
 logger_3.addHandler(hdlr_3)
 
+logger_4 = logging.getLogger('simple_logger_4')
+logger_4.setLevel(logging.INFO)
+hdlr_4 = logging.FileHandler('network.log')
+logger_4.addHandler(hdlr_4)
+
+
 
 
 
@@ -299,16 +305,19 @@ def sendToEdgeCache(number):
 	while True:
 		while 1:
 			try:
+				logger_4.info('BINDING ... ')
 				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 				s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 				s.bind((EdgeCache_IP, EdgeCache_Port))
 				s.listen(1)
 				is_connected = True
-			except:
+			except Exception,e::
+				logger_4.info(str(e))
 				time.sleep(30)
 				pass
 		
 		conn, addr  = s.accept()
+		logger_4.info('CONNECT TO EC ... ')
 
 		while 1 and is_connected:
 
@@ -318,7 +327,8 @@ def sendToEdgeCache(number):
 				try:
 					conn.sendall(MESSAGE)
 					conn.sendall('**EDGE_OBJECT**')
-				except:
+				except Exception,e:
+					logger_4.info(str(e))
 					conn.close()
 					s.close()
 					break
