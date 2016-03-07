@@ -14,6 +14,7 @@ import sys
 import logging
 import edgeCacheObject
 import constants
+import time
 from preFetching import ALL_WEBSITES
 global FROM_INTERNET, PUSH_TO_EDGE_CACHE, REQUEST_REFRER, WEB_PAGE_CHANGE_TRACK
 REQUEST_REFRER = {}
@@ -290,24 +291,35 @@ def calculateDiff(new , old):
 
 def sendToEdgeCache(number):
 	global PUSH_TO_EDGE_CACHE
-	EdgeCache_IP = constants.EDGECACHE_IP # '195.229.110.139'
+	CLOUD_CONTROLLER_SERVER = True
+	is_connected = False
+	EdgeCache_IP = constants.CONTROLLER_IP
 	EdgeCache_PORT = constants.EDGECACHE_PORT_OBJECTS
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((EdgeCache_IP, EdgeCache_PORT))
 
 	while True:
-		
-		if len(PUSH_TO_EDGE_CACHE) > 0:
-			
-			edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
-			#print edgeObject.url
-			MESSAGE = cPickle.dumps(edgeObject)
+		while 1:
 			try:
-				#print MESSAGE
-				#print '---------'
-				s.sendall(MESSAGE)
-				s.sendall('EDGEALIRAZAOBJECT')
-			except:
 				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				s.connect((EdgeCache_IP, EdgeCache_PORT))	
-		#time.sleep(0.001)
+				s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+				s.bind((EdgeCache_IP, EdgeCache_Port))
+				s.listen(1)
+				is_connected = True
+			except:
+				time.sleep(30)
+				pass
+		
+		conn, addr  = s.accept()
+
+		while 1 and is_connected:
+
+			if len(PUSH_TO_EDGE_CACHE) > 0:
+				edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
+				MESSAGE = cPickle.dumps(edgeObject)
+				try:
+					conn.sendall(MESSAGE)
+					conn.sendall('**EDGE_OBJECT**')
+				except:
+					conn.close()
+					s.close()
+					break
+

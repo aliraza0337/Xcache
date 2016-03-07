@@ -9,7 +9,15 @@ import diff_match_patch
 import reportLogs 
 import edgeCacheObject 
 import constants 
+import logging 
+
 global ALL_OBJECTS , PUSH_TO_CACHE, PREVIOUS_OBJECTS 
+
+logger_1 = logging.getLogger('simple_logger')
+logger_1.setLevel(logging.INFO)
+hdlr_1 = logging.FileHandler('network.log')
+logger_1.addHandler(hdlr_1)
+
 
 ALL_OBJECTS = [] 
 PUSH_TO_CACHE = []
@@ -29,24 +37,33 @@ def listenFromController(num):
 
 	EdgeCache_IP = constants.EDGECACHE_IP
 	EdgeCache_Port = constants.EDGECACHE_PORT_OBJECTS
-	print EdgeCache_Port
-	s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
-	s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
-	s.bind((EdgeCache_IP, EdgeCache_Port))
-
-	print 'Listening ....'
 	while 1:
-		s.listen(1)
-		conn, addr = s.accept()
-		MESSAGE= ""
-		data = conn.recv(1024)
-		while data:
+
+		while 1:
+			try:
+				logger_1.info('connecting to CC\n')
+				s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
+				s.connect((EdgeCache_IP, EdgeCache_Port))
+				logger_1.info('connected...\n')
+			except:
+				time.sleep(30)
+
+
+		MESSAGE = ''
+		while 1:
+			data = s.recv(1024)
 			MESSAGE += data
-			data = conn.recv(1024)
-		edgeObject = cPickle.loads(MESSAGE)
-		#print edgeObject.url[:50]
-		ALL_OBJECTS.append(edgeObject)
-		time.sleep(0.001)
+				if '**EDGE_OBJECT**' in MESSAGE: 
+					try:
+						edgeObject = cPickle.loads(MESSAGE.split('**EDGE_OBJECT**')[0])
+						ALL_OBJECTS.append(edgeObject)
+					except:
+						pass
+					MESSAGE = MESSAGE.split('**EDGE_OBJECT**')[1]
+
+
+
+
 
 
 
