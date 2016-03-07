@@ -307,7 +307,7 @@ def sendToEdgeCache(number):
 			logger_4.info('BINDING ... ')
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-			s.bind((EdgeCache_IP, EdgeCache_Port))
+			s.bind((EdgeCache_IP, EdgeCache_PORT))
 			s.listen(1)
 			conn, addr  = s.accept()
 		except Exception,e:
