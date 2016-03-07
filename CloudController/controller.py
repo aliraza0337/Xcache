@@ -303,18 +303,18 @@ def sendToEdgeCache(number):
 	EdgeCache_PORT = constants.EDGECACHE_PORT_OBJECTS
 
 	while True:
-		while 1:
-			try:
-				logger_4.info('BINDING ... ')
-				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-				s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-				s.bind((EdgeCache_IP, EdgeCache_Port))
-				s.listen(1)
-				is_connected = True
-			except Exception,e::
-				logger_4.info(str(e))
-				time.sleep(30)
-				pass
+
+		try:
+			logger_4.info('BINDING ... ')
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+			s.bind((EdgeCache_IP, EdgeCache_Port))
+			s.listen(1)
+			is_connected = True
+		except Exception,e::
+			logger_4.info(str(e))
+			time.sleep(30)
+			pass
 		
 		conn, addr  = s.accept()
 		logger_4.info('CONNECT TO EC ... ')
@@ -328,6 +328,7 @@ def sendToEdgeCache(number):
 					conn.sendall(MESSAGE)
 					conn.sendall('**EDGE_OBJECT**')
 				except Exception,e:
+					is_connected = False
 					logger_4.info(str(e))
 					conn.close()
 					s.close()
