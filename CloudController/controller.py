@@ -298,7 +298,6 @@ def calculateDiff(new , old):
 def sendToEdgeCache(number):
 	global PUSH_TO_EDGE_CACHE
 	CLOUD_CONTROLLER_SERVER = True
-	is_connected = False
 	EdgeCache_IP = constants.CONTROLLER_IP
 	EdgeCache_PORT = constants.EDGECACHE_PORT_OBJECTS
 
@@ -310,18 +309,19 @@ def sendToEdgeCache(number):
 			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 			s.bind((EdgeCache_IP, EdgeCache_Port))
 			s.listen(1)
-			is_connected = True
+			
 		except Exception,e::
 			logger_4.info(str(e))
 			time.sleep(30)
-			pass
+			continue
 		
 		conn, addr  = s.accept()
 		logger_4.info('CONNECT TO EC ... ')
-
-		while 1 and is_connected:
+		start_time = time.time()
+		while 1:
 
 			if len(PUSH_TO_EDGE_CACHE) > 0:
+				start_time = time.time()
 				edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
 				MESSAGE = cPickle.dumps(edgeObject)
 				try:
@@ -333,4 +333,17 @@ def sendToEdgeCache(number):
 					conn.close()
 					s.close()
 					break
-
+			else:
+				time.sleep(1)
+				
+			if time.time() - start_time > 240:
+				start_time = time.time()
+				try:
+					conn.sendall('Alive')
+					conn.sendall('**EDGE_OBJECT**')
+				except Exception,e:
+					is_connected = False
+					logger_4.info(str(e))
+					conn.close()
+					s.close()
+					break
