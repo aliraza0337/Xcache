@@ -1,4 +1,3 @@
-#aliraza
 import os 
 import cPickle
 from threading import Thread 
