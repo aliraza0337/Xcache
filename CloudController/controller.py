@@ -319,8 +319,9 @@ def sendToEdgeCache(number):
 		logger_4.info('CONNECT TO EC ... ')
 		start_time = time.time()
 		while 1:
-			print 'ready to send objects'
+			#print 'ready to send objects'
 			if len(PUSH_TO_EDGE_CACHE) > 0:
+				print 'pushing an object'
 				start_time = time.time()
 				edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
 				MESSAGE = cPickle.dumps(edgeObject)
