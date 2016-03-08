@@ -301,27 +301,34 @@ def sendToEdgeCache(number):
 	EdgeCache_IP = constants.CONTROLLER_IP
 	EdgeCache_PORT = constants.EDGECACHE_PORT_OBJECTS
 
+	logger_4.info('BINDING ... ')
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+	s.bind((EdgeCache_IP, EdgeCache_PORT))
+	s.listen(1)
+
+
 	while True:
 
 		try:
-			logger_4.info('BINDING ... ')
+			conn, addr  = s.accept()
+		except Exception,e:
+
+			logger_4.info('BINDING AGAIN ... ')
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 			s.bind((EdgeCache_IP, EdgeCache_PORT))
 			s.listen(1)
-			conn, addr  = s.accept()
-		except Exception,e:
+
 			logger_4.info(str(e))
 			time.sleep(30)
 			continue
 		
 		
-		logger_4.info('CONNECT TO EC ... ')
+		logger_4.info('CONNECTED TO EC ... ')
 		start_time = time.time()
 		while 1:
-			#print 'ready to send objects'
 			if len(PUSH_TO_EDGE_CACHE) > 0:
-				print 'pushing an object'
 				start_time = time.time()
 				edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
 				MESSAGE = cPickle.dumps(edgeObject)
