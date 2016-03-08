@@ -6,8 +6,7 @@ import socket
 import cPickle
 import constants
 
-def getLogs(previous):
-	
+def getLogs(previous):	
 	finalList = []
 	information = {}
 	popularity = {}
@@ -61,6 +60,7 @@ def sendToController(websites):
 			s.sendall(MESSAGE)
 			s.close()
 			del s
+			break
 		except:
 			print 'Trying to send logs\n'
 			time.sleep(100)
@@ -71,7 +71,7 @@ def sendToController(websites):
 def startFunc(num):
 	print 'Sending Logs!'
 	previous = " "
-	time.sleep(100)
+	time.sleep(10)
 	while 1:
 		try:
 			websites, previous = getLogs(previous)

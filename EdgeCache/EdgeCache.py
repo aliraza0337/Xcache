@@ -1,7 +1,7 @@
 import os 
 import cPickle
 from threading import Thread 
-import socket as dummysocket
+import socket
 import time 
 import random 
 import string as stringRandom 
@@ -9,7 +9,8 @@ import diff_match_patch
 import reportLogs 
 import edgeCacheObject 
 import constants 
-import logging 
+import logging
+import datetime
 global ALL_OBJECTS , PUSH_TO_CACHE, PREVIOUS_OBJECTS 
 
 logger_1 = logging.getLogger('simple_logger')
@@ -35,18 +36,20 @@ def startfunc():
 
 
 def listenFromController(num):
-
-	EdgeCache_IP = constants.EDGECACHE_IP
+	global ALL_OBJECTS
+	EdgeCache_IP = constants.CONTROLLER_IP
 	EdgeCache_Port = constants.EDGECACHE_PORT_OBJECTS
 	while True:
-
 		try:
+			print 'trying connecting'
 			logger_1.info('connecting to CC\n')
-			s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.settimeout(300)
 			s.connect((EdgeCache_IP, EdgeCache_Port))
-			s.settimeout(300)	
-		except:
-			time.sleep(30)
+			print 'connected'	
+		except Exception,e:
+			print str(e)
+			#time.sleep(30)
 			continue
 				
 		logger_1.info('connected...\n')
@@ -55,12 +58,14 @@ def listenFromController(num):
 			try:
 				data = s.recv(1024)
 				MESSAGE += data
-				if '**EDGE_OBJECT**' in MESSAGE: 
+				if '**EDGE_OBJECT**' in MESSAGE:
+					print 'Object received' 
 					if MESSAGE.split('**EDGE_OBJECT**')[0] != 'Alive':
 						try:
 							edgeObject = cPickle.loads(MESSAGE.split('**EDGE_OBJECT**')[0])
 							ALL_OBJECTS.append(edgeObject)
-						except:
+						except Exception,e:
+							print e
 							pass
 					MESSAGE = MESSAGE.split('**EDGE_OBJECT**')[1]
 			except Exception, e:
@@ -93,7 +98,6 @@ def push_in_cache(edgeObject, mode):
 		del edgeObject
 
 def applyDiff(obj):
-
 	global PREVIOUS_OBJECTS
 	
 	if obj.url in PREVIOUS_OBJECTS:
