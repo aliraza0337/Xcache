@@ -217,25 +217,27 @@ def receiveLogs(num):
 	s.bind((CONTROLLER_IP, CONTROLLER_PORT))
 
 	while 1:
-		s.listen(1)
-		conn, addr = s.accept()
-		MESSAGE= ""
-		data = conn.recv(1024)
-		while data:
-			MESSAGE += data
+		try:
+			s.listen(1)
+			conn, addr = s.accept()
+			MESSAGE= ""
 			data = conn.recv(1024)
-		websites = cPickle.loads(MESSAGE)
-		tmp = websites
-		print tmp
-		for siteInfo in tmp:
-			if siteInfo[0] in ALL_WEBSITES:
-				ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
-			else:
-				BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
-				ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
-				log_string = 'ADDED FROM LOGS: '+siteInfo[0]
-				logger_1.info(log_string)
-
+			while data:
+				MESSAGE += data
+				data = conn.recv(1024)
+			websites = cPickle.loads(MESSAGE)
+			tmp = websites
+			print tmp
+			for siteInfo in tmp:
+				if siteInfo[0] in ALL_WEBSITES:
+					ALL_WEBSITES[siteInfo[0]].N = 0.7*ALL_WEBSITES[siteInfo[0]].N + 0.3*siteInfo[1] # TODO: fix the ewma alpha parameter (at the moment random number is given)
+				else:
+					BOOTSTRAPSITES [siteInfo[0]]=[MAX_BOOTSTRAP , 0]
+					ALL_WEBSITES[siteInfo[0]]=controller.WebPage(siteInfo[1])
+					log_string = 'ADDED FROM LOGS: '+siteInfo[0]
+					logger_1.info(log_string)
+		except:
+			pass
 	return
 
 

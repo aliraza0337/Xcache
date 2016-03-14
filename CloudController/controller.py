@@ -190,6 +190,10 @@ def process_FromInternet(number):
 	while 1:
 		if len(FROM_INTERNET) != 0:
 			tempObj = FROM_INTERNET.pop(0)
+					
+			if '?' in tempObj.url or '%' in tempObj.url:
+				continue 
+
 
 			if tempObj.webpage in ALL_WEBSITES:
 			# the object is part of a webpage that we know
@@ -313,13 +317,11 @@ def sendToEdgeCache(number):
 		try:
 			conn, addr  = s.accept()
 		except Exception,e:
-
 			logger_4.info('BINDING AGAIN ... ')
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 			s.bind((EdgeCache_IP, EdgeCache_PORT))
 			s.listen(1)
-
 			logger_4.info(str(e))
 			time.sleep(30)
 			continue
@@ -339,7 +341,6 @@ def sendToEdgeCache(number):
 					is_connected = False
 					logger_4.info(str(e))
 					conn.close()
-					s.close()
 					break
 			else:
 				time.sleep(1)
