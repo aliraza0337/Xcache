@@ -41,35 +41,34 @@ def listenFromController(num):
 	EdgeCache_Port = constants.EDGECACHE_PORT_OBJECTS
 	while True:
 		try:
-			print 'trying connecting'
-			logger_1.info('connecting to CC\n')
+			logger_1.info('connecting to CC')
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.settimeout(300)
 			s.connect((EdgeCache_IP, EdgeCache_Port))
-			print 'connected'	
 		except Exception,e:
 			print str(e)
-			#time.sleep(30)
+			logger_1.info(str(e))
 			continue
 				
-		logger_1.info('connected...\n')
+		logger_1.info('Connected!...')
 		MESSAGE = ''
 		while True:
 			try:
 				data = s.recv(1024)
 				MESSAGE += data
 				if '**EDGE_OBJECT**' in MESSAGE:
-					print 'Object received' 
 					if MESSAGE.split('**EDGE_OBJECT**')[0] != 'Alive':
 						try:
 							edgeObject = cPickle.loads(MESSAGE.split('**EDGE_OBJECT**')[0])
 							ALL_OBJECTS.append(edgeObject)
 						except Exception,e:
 							print e
+							logger_1.info(str(e))
 							pass
 					MESSAGE = MESSAGE.split('**EDGE_OBJECT**')[1]
 			except Exception, e:
 				logger_1.info(str(e))
+				print e
 				break
 
 
@@ -132,7 +131,6 @@ def processObjects(num):
 	while 1:
 		if len(ALL_OBJECTS) > 0:
 			edgeObject = ALL_OBJECTS.pop(0)
-			
 			if not edgeObject.diff:
 				try:	
 					push_in_cache(edgeObject, 'normal')
