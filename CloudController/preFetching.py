@@ -225,6 +225,7 @@ def receiveLogs(num):
 			while data:
 				MESSAGE += data
 				data = conn.recv(1024)
+			print 'Got Logs'
 			websites = cPickle.loads(MESSAGE)
 			tmp = websites
 			print tmp
@@ -237,6 +238,9 @@ def receiveLogs(num):
 					log_string = 'ADDED FROM LOGS: '+siteInfo[0]
 					logger_1.info(log_string)
 		except:
+			s = dummysocket.socket(dummysocket.AF_INET, dummysocket.SOCK_STREAM)
+			s.setsockopt(dummysocket.SOL_SOCKET, dummysocket.SO_REUSEADDR, 1)
+			s.bind((CONTROLLER_IP, CONTROLLER_PORT))
 			pass
 	return
 

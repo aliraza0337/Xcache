@@ -314,9 +314,12 @@ def sendToEdgeCache(number):
 
 	while True:
 
+
 		try:
+			print 'trying'
 			conn, addr  = s.accept()
 		except Exception,e:
+			print 'excepting'
 			logger_4.info('BINDING AGAIN ... ')
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -330,6 +333,7 @@ def sendToEdgeCache(number):
 		logger_4.info('CONNECTED TO EC ... ')
 		start_time = time.time()
 		while 1:
+			print 'connected'
 			if len(PUSH_TO_EDGE_CACHE) > 0:
 				start_time = time.time()
 				edgeObject = PUSH_TO_EDGE_CACHE.pop(0)
@@ -338,21 +342,25 @@ def sendToEdgeCache(number):
 					conn.sendall(MESSAGE)
 					conn.sendall('**EDGE_OBJECT**')
 				except Exception,e:
+					print 'except2'
 					is_connected = False
 					logger_4.info(str(e))
 					conn.close()
 					break
 			else:
 				time.sleep(1)
-				
-			if time.time() - start_time > 240:
+			print 'checking for live'				
+			if time.time() - start_time > 24:
+				print 'sendinggggggggg'
 				start_time = time.time()
 				try:
 					conn.sendall('Alive')
 					conn.sendall('**EDGE_OBJECT**')
+					print 'no exception'
 				except Exception,e:
 					is_connected = False
 					logger_4.info(str(e))
 					conn.close()
 					s.close()
+					print 's.closed()'
 					break
