@@ -1,12 +1,12 @@
-import os 
+import os
 import sys
-import glob 
+import glob
 import time
 import socket
 import cPickle
 import constants
 
-def getLogs(previous):	
+def getLogs(previous):
 	finalList = []
 	information = {}
 	popularity = {}
@@ -18,7 +18,7 @@ def getLogs(previous):
 		return [], " "
 
 	one = sorted_allFiles[-1]
-	print one 
+	print one
 	if one == previous:
 		return [],one
 	path_to_log = one
@@ -44,8 +44,8 @@ def getLogs(previous):
 			dictionary_referrer[tokens[10].strip()] = 1
 	for d in dictionary_referrer:
 		if dictionary_referrer[d] > 10 and d in dictionary_url:
-			finalList.append([ d, dictionary_url[d] ]) 
-	return finalList , one 
+			finalList.append([ d, dictionary_url[d] ])
+	return finalList , one
 
 
 def sendToController(websites):
@@ -53,19 +53,22 @@ def sendToController(websites):
 	CONTROLLER_IP = constants.CONTROLLER_IP
 	CONTROLLER_PORT = constants.CONTROLLER_PORT_LOGS
 	MESSAGE = cPickle.dumps(websites)
+	print 'here as well'
 	while 1:
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect((CONTROLLER_IP, CONTROLLER_PORT))
+			print 'connected'
 			s.sendall(MESSAGE)
 			s.close()
+			print 'Logs sent'
 			del s
 			break
 		except:
 			print 'Trying to send logs\n'
 			time.sleep(100)
-			
-	return 
+
+	return
 
 
 def startFunc(num):
@@ -78,9 +81,14 @@ def startFunc(num):
 			print websites
 			if len(websites) > 0:
 				try:
+					print 'sending'
 					sendToController(websites)
 				except:
 					pass
 			time.sleep(1800)
 		except:
 			pass
+
+
+
+#startFunc(1)
